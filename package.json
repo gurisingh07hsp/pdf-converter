@@ -4,23 +4,44 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
+    "server": "nodemon --watch src/server --exec ts-node -P tsconfig.server.json src/server/index.ts",
     "build": "next build",
     "start": "next start",
     "lint": "eslint"
   },
   "dependencies": {
+    "@types/fabric": "^5.3.11",
+    "clsx": "^2.1.1",
+    "cors": "^2.8.6",
+    "dotenv": "^17.4.2",
+    "express": "^5.2.1",
+    "fabric": "^7.4.0",
+    "lucide-react": "^1.17.0",
+    "multer": "^2.1.1",
     "next": "16.2.7",
+    "pdf-lib": "^1.17.1",
+    "pdfjs-dist": "^6.0.227",
     "react": "19.2.4",
-    "react-dom": "19.2.4"
+    "react-dom": "19.2.4",
+    "react-pdf": "^10.4.1",
+    "tailwind-merge": "^3.6.0",
+    "tesseract.js": "^7.0.0",
+    "uuid": "^14.0.0"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4",
+    "@types/cors": "^2.8.19",
+    "@types/express": "^5.0.6",
+    "@types/multer": "^2.1.0",
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
+    "@types/uuid": "^10.0.0",
     "eslint": "^9",
     "eslint-config-next": "16.2.7",
+    "nodemon": "^3.1.14",
     "tailwindcss": "^4",
+    "ts-node": "^10.9.2",
     "typescript": "^5"
   }
 }
