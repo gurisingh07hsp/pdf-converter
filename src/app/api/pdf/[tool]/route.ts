@@ -5,8 +5,8 @@ import fs from "fs";
 import { PDFService } from '@/lib/pdf/pdf-service';
 import { v4 as uuidv4 } from 'uuid';
 
-export async function POST(req: NextRequest, { params }: { params: { tool: string } }) { 
-  const tool = params.tool;
+export async function POST(req: NextRequest,{ params }: { params: Promise<{ tool: string }> }) { 
+  const { tool } = await params;
   const tempId = uuidv4();
   const uploadDir = path.join(process.cwd(), "uploads"); 
   const inputPaths: string[] = [];

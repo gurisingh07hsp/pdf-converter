@@ -1,10 +1,14 @@
 "use client";
-
 import { useState } from 'react';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import FileUpload from '@/components/FileUpload';
-import PDFEditor from '@/components/pdf-editor/PDFEditor';
+import dynamic from 'next/dynamic';
+
+const PDFEditor = dynamic(
+  () => import('@/components/pdf-editor/PDFEditor'),
+  { ssr: false }
+);
 
 export default function EditPage() {
   const [file, setFile] = useState<File | null>(null);
@@ -12,7 +16,7 @@ export default function EditPage() {
   return (
     <div className="flex flex-col min-h-screen">
       {!file && <Navbar />}
-      <main className="flex-grow bg-surface">
+      <main className="grow bg-surface">
         {!file ? (
           <div className="max-w-4xl mx-auto px-8 py-20">
             <div className="text-center mb-12">

@@ -6,22 +6,23 @@ import os from 'os';
 const UPLOAD_DIR = path.join(os.tmpdir(), 'pdf-swift-uploads');
 
 export async function GET(
-    request: NextRequest,
-    { params }: { params: { filename: string } }
+  request: NextRequest,
+  { params }: { params: Promise<{ filename: string }> }
 ) {
-    const filename = params.filename;
-    const filePath = path.join(UPLOAD_DIR, filename);
+  const { filename } = await params;
 
-    if (!fs.existsSync(filePath)) {
-        return new NextResponse('File not found', { status: 404 });
-    }
+  const filePath = path.join(UPLOAD_DIR, filename);
 
-    const fileBuffer = fs.readFileSync(filePath);
-    
-    return new NextResponse(fileBuffer, {
-        headers: {
-            'Content-Type': 'application/pdf',
-            'Content-Disposition': `attachment; filename="${filename}"`,
-        },
-    });
+  if (!fs.existsSync(filePath)) {
+    return new NextResponse('File not found', { status: 404 });
+  }
+
+  const fileBuffer = fs.readFileSync(filePath);
+
+  return new NextResponse(fileBuffer, {
+    headers: {
+      'Content-Type': 'application/pdf',
+      'Content-Disposition': `attachment; filename="${filename}"`,
+    },
+  });
 }

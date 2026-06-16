@@ -63,7 +63,7 @@ export class PDFController {
             const inputPath = req.file.path;
             const outputDir = path.dirname(inputPath);
 
-            const resultPath = await PDFService.convertToPDF(inputPath, outputDir);
+            const resultPath = await PDFService.convertToPDFA(inputPath, outputDir);
 
             res.json({
                 message: 'Conversion successful',

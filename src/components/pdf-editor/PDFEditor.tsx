@@ -221,7 +221,7 @@ export default function PDFEditor({ file }: PDFEditorProps) {
         </div>
 
         {/* Editor Area */}
-        <div className="flex-grow overflow-auto p-12 flex justify-center bg-gray-100/50" ref={containerRef}>
+        <div className="grow overflow-auto p-12 flex justify-center bg-gray-100/50" ref={containerRef}>
           <div className="relative shadow-2xl bg-white" style={{ width: 600, height: 800 }}>
             {/* Contextual Toolbar */}
             {selectedObject && (
