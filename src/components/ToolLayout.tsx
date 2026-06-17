@@ -71,7 +71,7 @@ export default function ToolLayout({
 
   return (
     <div className="flex flex-col min-h-screen">
-      <main className="flex-grow py-20 bg-surface">
+      <main className="grow py-20 bg-surface">
         <div className="max-w-4xl mx-auto px-8">
           <div className="text-center mb-12">
             <h1 className="text-4xl font-extrabold mb-4">{title}</h1>
@@ -88,7 +88,7 @@ export default function ToolLayout({
           )}
 
           {status === 'processing' && (
-            <div className="bg-white rounded-[2rem] p-16 text-center shadow-sm">
+            <div className="bg-white rounded-4xl p-16 text-center shadow-sm">
               <div className="flex items-center justify-center gap-2 mb-4">
                 <span className="w-2 h-2 bg-red-500 rounded-full animate-pulse" />
                 <span className="text-[10px] font-bold text-red-500 uppercase tracking-widest">In Progress</span>
@@ -107,7 +107,7 @@ export default function ToolLayout({
           )}
 
           {status === 'success' && (
-            <div className="bg-white rounded-[2rem] p-16 text-center shadow-sm">
+            <div className="bg-white rounded-4xl p-16 text-center shadow-sm">
               <div className="w-20 h-20 bg-orange-50 rounded-full flex items-center justify-center mx-auto mb-8">
                 <ShieldCheck className="w-10 h-10 text-primary" />
               </div>
@@ -132,7 +132,7 @@ export default function ToolLayout({
           )}
 
           {status === 'error' && (
-            <div className="bg-white rounded-[2rem] p-16 text-center shadow-sm">
+            <div className="bg-white rounded-4xl p-16 text-center shadow-sm">
               <div className="w-16 h-16 bg-red-50 rounded-full flex items-center justify-center mx-auto mb-6">
                 <AlertCircle className="w-8 h-8 text-red-500" />
               </div>

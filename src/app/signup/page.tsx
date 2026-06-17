@@ -6,12 +6,17 @@ import { Eye, EyeOff, Mail, Lock, User, ArrowRight, ShieldCheck, CheckCircle2 } 
 
 export default function SignupPage() {
   const [showPassword, setShowPassword] = useState(false);
+  const [form, setForm] = useState({
+    name: '',
+    email: '',
+    password: ''
+  })
 
   return (
     <div className="min-h-screen flex items-stretch bg-white">
       {/* Left Side: Visual/Feature */}
       <div className="hidden lg:flex flex-1 bg-[#1a1a1a] items-center justify-center p-12 text-white relative overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-br from-primary/20 to-transparent pointer-events-none" />
+        <div className="absolute inset-0 bg-linear-to-br from-primary/20 to-transparent pointer-events-none" />
         <div className="max-w-md relative z-10">
           <Link href="/" className="flex items-center text-2xl font-bold mb-16">
             <span className="text-primary">PDF</span>
@@ -27,7 +32,7 @@ export default function SignupPage() {
               { title: "Smart Organization", desc: "Keep all your processed documents in one centralized, secure dashboard." }
             ].map((feature, i) => (
               <div key={i} className="flex gap-4">
-                <div className="flex-shrink-0 w-6 h-6 bg-primary rounded-full flex items-center justify-center">
+                <div className="shrink-0 w-6 h-6 bg-primary rounded-full flex items-center justify-center">
                   <CheckCircle2 className="w-4 h-4 text-white" />
                 </div>
                 <div>

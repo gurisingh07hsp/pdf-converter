@@ -1,4 +1,6 @@
 import fs from 'fs';
+import Fs from 'fs/promises';
+import { PDFDocument } from 'pdf-lib';
 import path from 'path';
 import { exec } from 'child_process';
 import util from 'util';
@@ -52,38 +54,106 @@ export class PDFService {
     }
 
     /**
-     * Merge multiple PDF files using QPDF
+     * Merge multiple PDF files using pdf-lib
      */
     static async mergePDFs(filePaths: string[], outputPath: string) {
-        const qpdf = await this.getCmd('qpdf');
-        const inputFiles = filePaths.map(f => `"${f}"`).join(' ');
-        const command = `${qpdf} --empty --pages ${inputFiles} -- "${outputPath}"`;
-        
         try {
-            await execPromise(command);
+            const mergedPdf = await PDFDocument.create();
+
+            for (const filePath of filePaths) {
+                const pdfBytes = await Fs.readFile(filePath);
+
+                const pdf = await PDFDocument.load(pdfBytes);
+
+                const copiedPages = await mergedPdf.copyPages(
+                    pdf,
+                    pdf.getPageIndices()
+                );
+
+                copiedPages.forEach((page) => {
+                    mergedPdf.addPage(page);
+                });
+            }
+
+            const mergedPdfBytes = await mergedPdf.save();
+
+            await Fs.writeFile(outputPath, mergedPdfBytes);
+
             return outputPath;
         } catch (error) {
-            console.error('QPDF merge failed:', error);
-            throw new Error('Merge failed. Ensure QPDF is installed.');
+            console.error('PDF merge failed:', error);
+            throw new Error('Merge failed');
         }
+
+
+
+
+
+        // const qpdf = await this.getCmd('qpdf');
+        // const inputFiles = filePaths.map(f => `"${f}"`).join(' ');
+        // const command = `${qpdf} --empty --pages ${inputFiles} -- "${outputPath}"`;
+        
+        // try {
+        //     await execPromise(command);
+        //     return outputPath;
+        // } catch (error) {
+        //     console.error('QPDF merge failed:', error);
+        //     throw new Error('Merge failed. Ensure QPDF is installed.');
+        // }
     }
 
     /**
      * Split a PDF into individual pages using QPDF
      */
     static async splitPDF(filePath: string, outputDir: string) {
-        const qpdf = await this.getCmd('qpdf');
-        // This will create files like outputDir/result-page-001.pdf
-        const command = `${qpdf} "${filePath}" --split-pages -- "${path.join(outputDir, 'split-')}.pdf"`;
-        
         try {
-            await execPromise(command);
-            const files = fs.readdirSync(outputDir).filter(f => f.startsWith('split-') && f.endsWith('.pdf'));
-            return files.map(f => path.join(outputDir, f));
+            const pdfBytes = await Fs.readFile(filePath);
+            const pdfDoc = await PDFDocument.load(pdfBytes);
+
+            const outputFiles: string[] = [];
+
+            const pageCount = pdfDoc.getPageCount();
+
+            for (let i = 0; i < pageCount; i++) {
+                const newPdf = await PDFDocument.create();
+
+                const [copiedPage] = await newPdf.copyPages(pdfDoc, [i]);
+
+                newPdf.addPage(copiedPage);
+
+                const pdfBytes = await newPdf.save();
+
+                const outputPath = path.join(
+                    outputDir,
+                    `split-${String(i + 1).padStart(3, '0')}.pdf`
+                );
+
+                await Fs.writeFile(outputPath, pdfBytes);
+
+                outputFiles.push(outputPath);
+            }
+
+            return outputFiles;
         } catch (error) {
-            console.error('QPDF split failed:', error);
-            throw new Error('Split failed. Ensure QPDF is installed.');
+            console.error('PDF split failed:', error);
+            throw new Error('Split failed');
         }
+
+
+
+
+        // const qpdf = await this.getCmd('qpdf');
+        // // This will create files like outputDir/result-page-001.pdf
+        // const command = `${qpdf} "${filePath}" --split-pages -- "${path.join(outputDir, 'split-')}.pdf"`;
+        
+        // try {
+        //     await execPromise(command);
+        //     const files = fs.readdirSync(outputDir).filter(f => f.startsWith('split-') && f.endsWith('.pdf'));
+        //     return files.map(f => path.join(outputDir, f));
+        // } catch (error) {
+        //     console.error('QPDF split failed:', error);
+        //     throw new Error('Split failed. Ensure QPDF is installed.');
+        // }
     }
 
     /**
@@ -103,29 +173,64 @@ export class PDFService {
     }
 
     /**
-     * Convert JPG/PNG to PDF using LibreOffice
+     * Convert JPG/PNG to PDF using pdf-lib
      */
     static async imagesToPDF(filePaths: string[], outputPath: string) {
-        const cmd = await this.getCmd('libreoffice');
-        const outputDir = path.dirname(outputPath);
-        
-        // LibreOffice convert-to pdf handles images well
+        const pdfDoc = await PDFDocument.create();
+
         for (const filePath of filePaths) {
-            const command = `${cmd} --headless --convert-to pdf --outdir "${outputDir}" "${filePath}"`;
-            await execPromise(command);
+            const imageBytes = await Fs.readFile(filePath);
+
+            const ext = path.extname(filePath).toLowerCase();
+
+            let image;
+
+            if (ext === '.png') {
+                image = await pdfDoc.embedPng(imageBytes);
+            } else {
+                image = await pdfDoc.embedJpg(imageBytes);
+            }
+
+            const page = pdfDoc.addPage([
+                image.width,
+                image.height
+            ]);
+
+            page.drawImage(image, {
+                x: 0,
+                y: 0,
+                width: image.width,
+                height: image.height
+            });
         }
 
-        // If multiple images, merge the resulting PDFs
-        const pdfPaths = filePaths.map(f => path.join(outputDir, path.basename(f).replace(/\.[^/.]+$/, "") + ".pdf"));
-        if (pdfPaths.length > 1) {
-            await this.mergePDFs(pdfPaths, outputPath);
-            // Cleanup individual PDFs
-            pdfPaths.forEach(p => fs.unlinkSync(p));
-        } else {
-            fs.renameSync(pdfPaths[0], outputPath);
-        }
-        
+        const pdfBytes = await pdfDoc.save();
+
+        await Fs.writeFile(outputPath, pdfBytes);
+
         return outputPath;
+
+
+        // const cmd = await this.getCmd('libreoffice');
+        // const outputDir = path.dirname(outputPath);
+        
+        // // LibreOffice convert-to pdf handles images well
+        // for (const filePath of filePaths) {
+        //     const command = `${cmd} --headless --convert-to pdf --outdir "${outputDir}" "${filePath}"`;
+        //     await execPromise(command);
+        // }
+
+        // // If multiple images, merge the resulting PDFs
+        // const pdfPaths = filePaths.map(f => path.join(outputDir, path.basename(f).replace(/\.[^/.]+$/, "") + ".pdf"));
+        // if (pdfPaths.length > 1) {
+        //     await this.mergePDFs(pdfPaths, outputPath);
+        //     // Cleanup individual PDFs
+        //     pdfPaths.forEach(p => fs.unlinkSync(p));
+        // } else {
+        //     fs.renameSync(pdfPaths[0], outputPath);
+        // }
+        
+        // return outputPath;
     }
 
     /**
