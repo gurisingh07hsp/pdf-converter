@@ -55,7 +55,12 @@ export default function ToolLayout({
         const blob = await response.blob();
         const url = window.URL.createObjectURL(blob);
         setDownloadUrl(url);
-      } else {
+      } else if(contentType?.includes('image/jpeg')){
+        const blob = await response.blob(); // ✅
+        const url = URL.createObjectURL(blob);
+        setDownloadUrl(url);
+      }
+      else {
         const data = await response.json();
         setDownloadUrl(data.downloadUrl);
       }

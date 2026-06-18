@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useState } from "react";
+import { useUser } from "@/context/UserContext";
 import { 
   ChevronDown, 
   Combine, 
@@ -44,6 +45,7 @@ const otherTools = [
 
 export default function Navbar() {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const {user, logout} = useUser();
 
   return (
     <nav className="flex items-center justify-between px-8 py-4 border-b border-border-custom bg-white sticky top-0 z-50">
@@ -66,7 +68,7 @@ export default function Navbar() {
             </button>
 
             {isDropdownOpen && (
-              <div className="absolute top-full left-0 w-[640px] bg-white border border-border-custom rounded-2xl shadow-2xl p-8 mt-0 flex gap-8">
+              <div className="absolute top-full left-0 w-160 bg-white border border-border-custom rounded-2xl shadow-2xl p-8 mt-0 flex gap-8">
                 <div className="flex-1">
                   <div className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-4 px-3">Convert to PDF</div>
                   <div className="flex flex-col gap-1">
@@ -143,17 +145,23 @@ export default function Navbar() {
         </div>
       </div>
 
+      {!user ? (
       <div className="flex items-center gap-6">
-        <Link href="/login" className="text-sm font-medium text-gray-700 hover:text-foreground">
+        <Link href="/login" className="text-sm cursor-pointer font-medium text-gray-700 hover:text-foreground">
           Log In
         </Link>
         <Link 
           href="/signup" 
-          className="bg-primary text-white px-6 py-2 rounded-lg text-sm font-semibold hover:bg-opacity-90 transition-all shadow-sm"
+          className="bg-primary cursor-pointer text-white px-6 py-2 rounded-lg text-sm font-semibold hover:bg-opacity-90 transition-all shadow-sm"
         >
           Sign Up
         </Link>
       </div>
+      ) : (
+        <button onClick={logout} className="bg-red-600 cursor-pointer text-white px-6 py-2 rounded-lg text-sm font-semibold hover:bg-opacity-90 transition-all shadow-sm">
+          Logout
+        </button>
+      )}
     </nav>
   );
 }

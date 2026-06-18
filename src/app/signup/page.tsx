@@ -3,14 +3,38 @@
 import Link from "next/link";
 import { useState } from "react";
 import { Eye, EyeOff, Mail, Lock, User, ArrowRight, ShieldCheck, CheckCircle2 } from "lucide-react";
+import axios from "axios";
+import { useRouter } from "next/navigation";
 
 export default function SignupPage() {
   const [showPassword, setShowPassword] = useState(false);
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
+  const router = useRouter();
   const [form, setForm] = useState({
     name: '',
     email: '',
     password: ''
   })
+
+    const handleSubmit = async () => {
+      setError("");
+      setLoading(true);
+      try {
+        const res = await axios.post("/api/auth/signup", form);
+  
+        if(res.status === 200){
+          alert("Signup successful");
+          setForm({ name: "", email: "", password: "" });
+          setError("");
+          router.push('/login');
+        }
+        } catch (err: any) {
+        setError(err.response?.data?.message || "Something went wrong.");
+      } finally {
+        setLoading(false);
+      }
+    };
 
   return (
     <div className="min-h-screen flex items-stretch bg-white">
@@ -73,7 +97,9 @@ export default function SignupPage() {
               <div className="relative">
                 <User className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
                 <input 
-                  type="text" 
+                  type="text"
+                  value={form.name}
+                  onChange={(e)=> setForm({...form, name: e.target.value})}
                   placeholder="John Doe" 
                   className="w-full bg-surface border border-border-custom rounded-xl pl-12 pr-6 py-4 focus:outline-none focus:border-primary/50 transition-all text-sm"
                 />
@@ -85,7 +111,9 @@ export default function SignupPage() {
               <div className="relative">
                 <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
                 <input 
-                  type="email" 
+                  type="email"
+                  value={form.email}
+                  onChange={(e)=> setForm({...form, email: e.target.value})}
                   placeholder="john@example.com" 
                   className="w-full bg-surface border border-border-custom rounded-xl pl-12 pr-6 py-4 focus:outline-none focus:border-primary/50 transition-all text-sm"
                 />
@@ -98,7 +126,9 @@ export default function SignupPage() {
                 <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
                 <input 
                   type={showPassword ? "text" : "password"} 
-                  placeholder="••••••••" 
+                  placeholder="••••••••"
+                  value={form.password}
+                  onChange={(e)=> setForm({...form, password: e.target.value})}
                   className="w-full bg-surface border border-border-custom rounded-xl pl-12 pr-12 py-4 focus:outline-none focus:border-primary/50 transition-all text-sm"
                 />
                 <button 
@@ -111,6 +141,12 @@ export default function SignupPage() {
               </div>
             </div>
 
+            {error && (
+              <p className="mt-3 text-xs text-red-500 bg-red-50 border border-red-100 rounded-lg px-3 py-2">
+                {error}
+              </p>
+            )}
+
             <div className="flex items-start gap-3 py-2">
               <input type="checkbox" className="mt-1 rounded border-border-custom text-primary focus:ring-primary" />
               <p className="text-xs text-gray-500 leading-relaxed font-medium">
@@ -118,8 +154,17 @@ export default function SignupPage() {
               </p>
             </div>
 
-            <button className="w-full bg-primary text-white py-4 rounded-xl font-bold flex items-center justify-center gap-3 shadow-xl shadow-primary/20 hover:scale-[1.01] transition-all">
-              Create Account <ArrowRight className="w-4 h-4" />
+            <button
+              onClick={handleSubmit}
+              disabled={loading}
+              className="w-full bg-primary text-white py-4 rounded-xl font-bold flex items-center justify-center gap-3 shadow-xl shadow-primary/20 hover:scale-[1.01] transition-all">
+                {loading ? (
+                  'Creating Account...'
+                ) : (
+                  <>
+                  Create Account <ArrowRight className="w-4 h-4" />
+                  </>
+                )}
             </button>
           </form>
 

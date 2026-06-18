@@ -93,6 +93,7 @@ export async function POST(req: NextRequest,{ params }: { params: Promise<{ tool
         break;
 
       case 'pdf-to-word':
+        console.log('main run.....');
         resultPath = await PDFService.convertWithLibreOffice(inputPaths[0], uploadDir, 'docx');
         contentType = "application/vnd.openxmlformats-officedocument.wordprocessingml.document";
         filename = "converted.docx";

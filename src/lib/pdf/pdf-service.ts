@@ -103,7 +103,7 @@ export class PDFService {
     }
 
     /**
-     * Split a PDF into individual pages using QPDF
+     * Split a PDF into individual pages using pdf-lib
      */
     static async splitPDF(filePath: string, outputDir: string) {
         try {
@@ -236,25 +236,57 @@ export class PDFService {
     /**
      * Universal converter using LibreOffice
      */
+    // static async convertWithLibreOffice(inputPath: string, outputDir: string, format: string = 'pdf') {
+    //     let cmd ='"C:\\Program Files\\LibreOffice\\program\\soffice.exe"';
+    //     if (fs.existsSync('/Applications/LibreOffice.app/Contents/MacOS/soffice')) {
+    //         cmd = '/Applications/LibreOffice.app/Contents/MacOS/soffice';
+    //     } else if (await this.checkCommand('soffice')) {
+    //         cmd = 'soffice';
+    //     }
+
+    //     const command = `${cmd} --headless --convert-to ${format} --outdir "${outputDir}" "${inputPath}"`;
+        
+    //     try {
+    //         await execPromise(command);
+    //         const fileName = path.basename(inputPath).replace(/\.[^/.]+$/, "") + "." + format;
+    //         return path.join(outputDir, fileName);
+    //     } catch (error) {
+    //         console.error('LibreOffice conversion failed:', error);
+    //         throw new Error(`Conversion to ${format} failed. Please ensure LibreOffice is installed.`);
+    //     }
+    // }
+
+
     static async convertWithLibreOffice(inputPath: string, outputDir: string, format: string = 'pdf') {
-        let cmd = 'libreoffice';
-        if (fs.existsSync('/Applications/LibreOffice.app/Contents/MacOS/soffice')) {
-            cmd = '/Applications/LibreOffice.app/Contents/MacOS/soffice';
-        } else if (await this.checkCommand('soffice')) {
+        let cmd = '';
+
+        if (process.platform === 'win32') {
+            cmd =
+                '"C:\\Program Files\\LibreOffice\\program\\soffice.exe"';
+        } else {
             cmd = 'soffice';
         }
 
-        const command = `${cmd} --headless --convert-to ${format} --outdir "${outputDir}" "${inputPath}"`;
-        
-        try {
-            await execPromise(command);
-            const fileName = path.basename(inputPath).replace(/\.[^/.]+$/, "") + "." + format;
-            return path.join(outputDir, fileName);
-        } catch (error) {
-            console.error('LibreOffice conversion failed:', error);
-            throw new Error(`Conversion to ${format} failed. Please ensure LibreOffice is installed.`);
-        }
+        const command =
+            `${cmd} --headless --convert-to ${format} ` +
+            `--outdir "${outputDir}" "${inputPath}"`;
+
+        console.log(command);
+
+        await execPromise(command);
+
+        const outputFile =
+            path.join(
+                outputDir,
+                path.basename(inputPath).replace(/\.[^/.]+$/, '')
+                + '.' + format
+            );
+
+        return outputFile;
     }
+
+
+
 
     /**
      * Convert PDF to PDF/A using Ghostscript

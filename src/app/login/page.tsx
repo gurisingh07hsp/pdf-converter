@@ -3,9 +3,40 @@
 import Link from "next/link";
 import { useState } from "react";
 import { Eye, EyeOff, ArrowRight, ShieldCheck } from "lucide-react";
+import axios from "axios";
+import { useUser } from "@/context/UserContext";
+import { useRouter } from "next/navigation";
 
 export default function LoginPage() {
   const [showPassword, setShowPassword] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+
+  const {setUser} = useUser();
+  const router = useRouter();
+  const [form, setForm] = useState({
+    email: '',
+    password: ''
+  })
+
+    const handleSubmit = async () => {
+    setError("");
+    setLoading(true);
+    try {
+      const res = await axios.post("/api/auth/login", form);
+
+      if(res.status === 200){
+        setUser(res.data.user);
+        setForm({ email: "", password: "" });
+        setError("");
+
+      }
+    } catch (err: any) {
+      setError(err.response?.data?.message || "Something went wrong.");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <div className="min-h-screen flex items-stretch bg-white">
@@ -45,7 +76,9 @@ export default function LoginPage() {
               <label className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Email Address</label>
               <input 
                 type="email" 
-                placeholder="john@example.com" 
+                placeholder="john@example.com"
+                value={form.email}
+                onChange={(e)=> setForm({...form, email: e.target.value})}
                 className="w-full bg-surface border border-border-custom rounded-xl px-6 py-4 focus:outline-none focus:border-primary/50 transition-all text-sm"
               />
             </div>
@@ -58,6 +91,8 @@ export default function LoginPage() {
                 <input 
                   type={showPassword ? "text" : "password"} 
                   placeholder="••••••••" 
+                  value={form.password}
+                  onChange={(e)=> setForm({...form, password: e.target.value})}
                   className="w-full bg-surface border border-border-custom rounded-xl px-6 py-4 focus:outline-none focus:border-primary/50 transition-all text-sm"
                 />
                 <button 
@@ -70,8 +105,23 @@ export default function LoginPage() {
               </div>
             </div>
 
-            <button className="w-full bg-primary text-white py-4 rounded-xl font-bold flex items-center justify-center gap-3 shadow-xl shadow-primary/20 hover:scale-[1.01] transition-all">
-              Sign In <ArrowRight className="w-4 h-4" />
+            {error && (
+              <p className="mt-3 text-xs text-red-500 bg-red-50 border border-red-100 rounded-lg px-3 py-2">
+                {error}
+              </p>
+            )}
+
+            <button
+              onClick={handleSubmit}
+              disabled={loading}
+              className="w-full bg-primary cursor-pointer text-white py-4 rounded-xl font-bold flex items-center justify-center gap-3 shadow-xl shadow-primary/20 hover:scale-[1.01] transition-all">
+                {loading ? (
+                  'Sign in...'
+                ):(
+                  <>
+                  Sign In <ArrowRight className="w-4 h-4" />
+                  </>
+                )}
             </button>
           </form>
 
