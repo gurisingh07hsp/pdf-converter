@@ -307,16 +307,32 @@ export class PDFService {
     /**
      * Unlock/Decrypt PDF using QPDF
      */
-    static async unlockPDF(inputPath: string, outputPath: string) {
-        const qpdf = await this.getCmd('qpdf');
-        const command = `${qpdf} --decrypt "${inputPath}" "${outputPath}"`;
+    // static async unlockPDF(inputPath: string, outputPath: string) {
+    //     const qpdf = await this.getCmd('qpdf');
+    //     const command = `${qpdf} --decrypt "${inputPath}" "${outputPath}"`;
         
+    //     try {
+    //         await execPromise(command);
+    //         return outputPath;
+    //     } catch (error) {
+    //         console.error('QPDF decrypt failed:', error);
+    //         throw new Error('Unlock failed. If the file is password protected, QPDF requires the password.');
+    //     }
+    // }
+
+    static async unlockPDF(inputPath: string,outputPath: string,password?: string) {
+        const qpdf = await this.getCmd('qpdf');
+
+        const command = password
+            ? `${qpdf} --password="${password}" --decrypt "${inputPath}" "${outputPath}"`
+            : `${qpdf} --decrypt "${inputPath}" "${outputPath}"`;
+
         try {
             await execPromise(command);
             return outputPath;
         } catch (error) {
             console.error('QPDF decrypt failed:', error);
-            throw new Error('Unlock failed. If the file is password protected, QPDF requires the password.');
+            throw new Error('Unlock failed.');
         }
     }
 }
