@@ -25,10 +25,6 @@ COPY . .
 RUN npm run build
 
 # Expose ports
-EXPOSE 3000 5001
+EXPOSE 3000
 
-# Install pm2 to manage both processes
-RUN npm install -g pm2
-
-# Start both servers with pm2
-CMD ["pm2-runtime", "start", "ecosystem.config.js"]
+CMD ["npm", "start"]
