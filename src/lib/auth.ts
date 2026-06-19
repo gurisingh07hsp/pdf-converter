@@ -1,12 +1,22 @@
 // lib/auth.ts
-import jwt from "jsonwebtoken";
+import jwt, { JwtPayload } from "jsonwebtoken";
 
-const JWT_SECRET = process.env.JWT_SECRET!;
+function getJwtSecret(): string {
+  const secret = process.env.JWT_SECRET;
 
-export function signToken(payload: any) {
-  return jwt.sign(payload, JWT_SECRET, { expiresIn: "7d" });
+  if (!secret) {
+    throw new Error("JWT_SECRET is not defined");
+  }
+
+  return secret;
 }
 
-export function verifyToken(token: string) {
-  return jwt.verify(token, JWT_SECRET);
+export function signToken(payload: string | object | Buffer) {
+  return jwt.sign(payload, getJwtSecret(), {
+    expiresIn: "7d",
+  });
+}
+
+export function verifyToken(token: string): string | JwtPayload {
+  return jwt.verify(token, getJwtSecret());
 }
