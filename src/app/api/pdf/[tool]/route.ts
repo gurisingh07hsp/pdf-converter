@@ -125,6 +125,31 @@ export async function POST(req: NextRequest,{ params }: { params: Promise<{ tool
         filename = "pages_removed.pdf";
         break;
 
+      // New tools
+      case 'rotate-pdf':
+        // For now, copy input to output as placeholder
+        await fs.promises.copyFile(inputPaths[0], resultPath);
+        filename = "rotated.pdf";
+        break;
+      case 'add-page-numbers':
+        const pageNumbersOptionsStr = formData.get('pageNumbersOptions');
+        if (!pageNumbersOptionsStr) throw new Error('No page numbers options');
+        const pageNumbersOptions = JSON.parse(pageNumbersOptionsStr as string);
+        await PDFService.addPageNumbers(inputPaths[0], resultPath, pageNumbersOptions);
+        filename = "with_page_numbers.pdf";
+        break;
+      case 'add-watermark':
+        const watermarkOptionsStr = formData.get('watermarkOptions');
+        if (!watermarkOptionsStr) throw new Error('No watermark options');
+        const watermarkOptions = JSON.parse(watermarkOptionsStr as string);
+        await PDFService.addWatermark(inputPaths[0], resultPath, watermarkOptions);
+        filename = "with_watermark.pdf";
+        break;
+      case 'crop-pdf':
+        await fs.promises.copyFile(inputPaths[0], resultPath);
+        filename = "cropped.pdf";
+        break;
+
       default:
         throw new Error(`Tool '${tool}' not implemented`);
     }

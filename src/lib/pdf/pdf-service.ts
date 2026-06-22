@@ -1,6 +1,6 @@
 import fs from 'fs';
 import Fs from 'fs/promises';
-import { PDFDocument } from 'pdf-lib';
+import { PDFDocument, ColorTypes, RotationTypes } from 'pdf-lib';
 import path from 'path';
 import { exec } from 'child_process';
 import util from 'util';
@@ -394,6 +394,147 @@ export class PDFService {
         } catch (error) {
             console.error('Remove pages failed:', error);
             throw new Error('Remove pages failed');
+        }
+    }
+
+    /**
+     * Add page numbers to a PDF
+     */
+    static async addPageNumbers(
+        inputPath: string,
+        outputPath: string,
+        options: {
+            position: string;
+            margin: number;
+            startNumber: number;
+            fromPage: number;
+            toPage: number;
+        }
+    ) {
+        try {
+            const pdfBytes = await Fs.readFile(inputPath);
+            const pdfDoc = await PDFDocument.load(pdfBytes);
+            const pages = pdfDoc.getPages();
+            const totalPages = pages.length;
+
+            for (let i = 0; i < totalPages; i++) {
+                const page = pages[i];
+                const pageNumber = options.startNumber + i;
+                const pageNumber1Based = i + 1;
+
+                // Check if page is in range
+                if (pageNumber1Based >= options.fromPage && pageNumber1Based <= options.toPage) {
+                    const { width, height } = page.getSize();
+                    const fontSize = 12;
+                    const text = `${pageNumber}`;
+
+                    // Position mapping (similar to iLovePDF)
+                    let x = 0;
+                    let y = 0;
+
+                    const margin = options.margin || 20;
+                    switch (options.position) {
+                        case 'top-left':
+                            x = margin;
+                            y = height - margin;
+                            break;
+                        case 'top-center':
+                            x = width / 2;
+                            y = height - margin;
+                            break;
+                        case 'top-right':
+                            x = width - margin;
+                            y = height - margin;
+                            break;
+                        case 'bottom-left':
+                            x = margin;
+                            y = margin;
+                            break;
+                        case 'bottom-center':
+                            x = width / 2;
+                            y = margin;
+                            break;
+                        case 'bottom-right':
+                            x = width - margin;
+                            y = margin;
+                            break;
+                        default:
+                            x = width / 2;
+                            y = margin;
+                    }
+
+                    page.drawText(text, {
+                        x: x,
+                        y: y,
+                        size: fontSize,
+                        color: { type: ColorTypes.RGB, red: 0, green: 0, blue: 0 },
+                        opacity: 1,
+                    });
+                }
+            }
+
+            const newPdfBytes = await pdfDoc.save();
+            await Fs.writeFile(outputPath, newPdfBytes);
+            return outputPath;
+        } catch (error) {
+            console.error('Add page numbers failed:', error);
+            throw new Error('Add page numbers failed');
+        }
+    }
+
+    /**
+     * Add watermark to a PDF
+     */
+    static async addWatermark(
+        inputPath: string,
+        outputPath: string,
+        options: {
+            type: 'text' | 'image';
+            text?: string;
+            imagePath?: string;
+            position: string;
+            rotation: number;
+            transparency: number;
+            fromPage: number;
+            toPage: number;
+        }
+    ) {
+        try {
+            const pdfBytes = await Fs.readFile(inputPath);
+            const pdfDoc = await PDFDocument.load(pdfBytes);
+            const pages = pdfDoc.getPages();
+            const totalPages = pages.length;
+
+            for (let i = 0; i < totalPages; i++) {
+                const page = pages[i];
+                const pageNumber1Based = i + 1;
+
+                // Check if page is in range
+                if (pageNumber1Based >= options.fromPage && pageNumber1Based <= options.toPage) {
+                    const { width, height } = page.getSize();
+
+                    if (options.type === 'text' && options.text) {
+                        page.drawText(options.text, {
+                            x: width / 2,
+                            y: height / 2,
+                            size: 50,
+                            color: { type: ColorTypes.RGB, red: 0.5, green: 0.5, blue: 0.5 },
+                            opacity: options.transparency || 0.3,
+                            rotate: { type: RotationTypes.Degrees, angle: options.rotation || 0 },
+                        });
+                    } else if (options.type === 'image' && options.imagePath) {
+                        // Handle image watermark if needed
+                        // For now, let's just support text watermark
+                    }
+                }
+            }
+
+            const newPdfBytes = await pdfDoc.save();
+            await Fs.writeFile(outputPath, newPdfBytes);
+            return outputPath;
+        } catch (error) {
+            console.error('Add watermark failed:', error);
+            throw new Error('Add watermark failed');
         }
     }
 }

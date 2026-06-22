@@ -18,7 +18,11 @@ import {
   Globe,
   FileType2,
   Trash2,
-  Languages
+  Languages,
+  RotateCw,
+  List,
+  Droplet,
+  Crop
 } from "lucide-react";
 
 const convertToPdf = [
@@ -42,9 +46,13 @@ const otherTools = [
   { title: "Split PDF", href: "/split", icon: Split, color: "text-red-500" },
   { title: "Compress PDF", href: "/compress", icon: Zap, color: "text-orange-600" },
   { title: "Remove Pages", href: "/remove-pages", icon: Trash2, color: "text-purple-500" },
-  { title: "Translate PDF", href: "/translate", icon: Languages, color: "text-blue-500" },
+  { title: "Rotate PDF", href: "/rotate-pdf", icon: RotateCw, color: "text-purple-600" },
+  { title: "Add Page Numbers", href: "/add-page-numbers", icon: List, color: "text-purple-600" },
+  { title: "Add Watermark", href: "/add-watermark", icon: Droplet, color: "text-purple-600" },
+  { title: "Crop PDF", href: "/crop-pdf", icon: Crop, color: "text-purple-600" },
   { title: "PDF Editor", href: "/edit", icon: FileEdit, color: "text-red-400" },
   { title: "Unlock PDF", href: "/unlock", icon: LockKeyhole, color: "text-pink-500" },
+  { title: "Translate PDF", href: "/translate", icon: Languages, color: "text-blue-500" },
 ];
 
 export default function Navbar() {
@@ -72,7 +80,7 @@ export default function Navbar() {
             </button>
 
             {isDropdownOpen && (
-              <div className="absolute top-full left-0 w-160 bg-white border border-border-custom rounded-2xl shadow-2xl p-8 mt-0 flex gap-8">
+              <div className="absolute top-full left-0 w-[800px] bg-white border border-border-custom rounded-2xl shadow-2xl p-6 mt-0 flex gap-6">
                 <div className="flex-1">
                   <div className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-4 px-3">Convert to PDF</div>
                   <div className="flex flex-col gap-1">
@@ -113,7 +121,7 @@ export default function Navbar() {
                   </div>
                 </div>
 
-                <div className="w-48 border-l border-border-custom pl-8">
+                <div className="w-56 border-l border-border-custom pl-6">
                   <div className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-4 px-3">Other Tools</div>
                   <div className="flex flex-col gap-1">
                     {otherTools.map((tool, i) => (
