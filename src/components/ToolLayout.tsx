@@ -1,15 +1,17 @@
 "use client";
 
 import { useState } from 'react';
-import Navbar from '@/components/Navbar';
-import Footer from '@/components/Footer';
+import Link from 'next/link';
 import FileUpload from '@/components/FileUpload';
-import { ShieldCheck, Zap, Cloud, Download, RotateCcw, AlertCircle } from 'lucide-react';
+import { ShieldCheck, Zap, Cloud, Download, RotateCcw, AlertCircle, ArrowRight } from "lucide-react";
+import { getRelevantTools, Tool, tools } from "@/lib/tools";
 
 interface ToolLayoutProps {
   title: string;
   description: string;
   apiEndpoint: string;
+  toolHref?: string;
+  howItWorks?: { title: string; description: string }[];
   acceptedTypes?: string[];
   multiple?: boolean;
 }
@@ -18,6 +20,8 @@ export default function ToolLayout({
   title, 
   description, 
   apiEndpoint, 
+  toolHref,
+  howItWorks,
   acceptedTypes = ['.pdf'],
   multiple = false 
 }: ToolLayoutProps) {
@@ -25,6 +29,7 @@ export default function ToolLayout({
   const [downloadUrl, setDownloadUrl] = useState<string | null>(null);
   const [progress, setProgress] = useState(0);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const relevantTools: Tool[] = toolHref ? getRelevantTools(toolHref) : tools.slice(0, 4);
 
   const handleUpload = async (files: File[]) => {
     setStatus('processing');
@@ -56,7 +61,7 @@ export default function ToolLayout({
         const url = window.URL.createObjectURL(blob);
         setDownloadUrl(url);
       } else if(contentType?.includes('image/jpeg')){
-        const blob = await response.blob(); // ✅
+        const blob = await response.blob();
         const url = URL.createObjectURL(blob);
         setDownloadUrl(url);
       }
@@ -77,7 +82,7 @@ export default function ToolLayout({
   return (
     <div className="flex flex-col min-h-screen">
       <main className="grow py-20 bg-surface">
-        <div className="max-w-4xl mx-auto px-8">
+        <div className="max-w-6xl mx-auto px-4 md:px-8">
           <div className="text-center mb-12">
             <h1 className="text-4xl font-extrabold mb-4">{title}</h1>
             <p className="text-gray-500 font-medium">{description}</p>
@@ -165,6 +170,61 @@ export default function ToolLayout({
               </div>
             ))}
           </div>
+
+          {/* How it Works */}
+          {howItWorks && (
+            <section className="mt-20">
+              <div className="mb-8">
+                <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 text-primary text-xs font-bold mb-4">
+                  <span>How it works</span>
+                </div>
+                <h2 className="text-xl font-bold text-foreground">How to {title.toLowerCase()}</h2>
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                {howItWorks.map((step, index) => (
+                  <div key={index} className="bg-gray-50 rounded-3xl p-8">
+                    <div className="text-primary font-black text-xl mb-4">Step {index + 1}</div>
+                    <h3 className="font-bold text-foreground mb-2">{step.title}</h3>
+                    <p className="text-sm text-gray-500 leading-relaxed">{step.description}</p>
+                  </div>
+                ))}
+              </div>
+            </section>
+          )}
+
+          {/* Relevant Tools */}
+          <section className="mt-20">
+            <div className="mb-8">
+              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 text-primary text-xs font-bold mb-4">
+                <span>You might also need</span>
+              </div>
+              <h2 className="text-xl font-bold text-foreground">Related tools</h2>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+              {relevantTools.map((tool, index) => (
+                <Link 
+                  key={index} 
+                  href={tool.href}
+                  className="bg-white p-6 rounded-3xl border border-border-custom hover:shadow-2xl hover:shadow-gray-200/50 transition-all cursor-pointer group block relative overflow-hidden"
+                >
+                  <div className="absolute top-0 right-0 p-4 opacity-0 group-hover:opacity-100 transition-opacity">
+                    <ArrowRight className="w-4 h-4 text-primary" />
+                  </div>
+                  <div className={`${tool.bgColor} w-14 h-14 rounded-xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform shadow-sm`}>
+                    <tool.icon className={`w-7 h-7 ${tool.iconColor}`} />
+                  </div>
+                  <h3 className="text-lg font-black text-foreground mb-2 group-hover:text-primary transition-colors">{tool.title}</h3>
+                  <p className="text-sm text-gray-400 leading-relaxed font-medium">
+                    {tool.description}
+                  </p>
+                  <div className="mt-4 inline-flex items-center gap-2 text-xs font-bold text-primary group-hover:gap-3 transition-all">
+                    <span>Use now</span>
+                    <ArrowRight className="w-3 h-3" />
+                  </div>
+                </Link>
+              ))}
+            </div>
+          </section>
         </div>
       </main>
     </div>

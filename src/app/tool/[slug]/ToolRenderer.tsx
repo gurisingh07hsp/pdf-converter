@@ -7,18 +7,18 @@ import { Wrench, ShieldCheck, Zap, Cloud } from "lucide-react";
 
 interface ToolPageProps {
   tool: {
-    slug: string;
-    category: string;
-    shortDescription: string;
-    fullDescription: string;
-    engine: {
+    slug?: string;
+    category?: string | string[];
+    shortDescription?: string;
+    fullDescription?: string;
+    engine?: {
       html: string;
       css: string;
       js: string;
     };
-    seo: {
-      metaTitle: string;
-      metaDescription: string;
+    seo?: {
+      metaTitle?: string;
+      metaDescription?: string;
     };
   };
 }
@@ -27,7 +27,7 @@ export default function ToolRenderer({ tool }: ToolPageProps) {
   const containerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    if (!containerRef.current) return;
+    if (!containerRef.current || !tool.slug || !tool.engine) return;
 
     // Inject CSS
     const styleId = `tool-style-${tool.slug}`;
@@ -69,24 +69,30 @@ export default function ToolRenderer({ tool }: ToolPageProps) {
         <div className="max-w-5xl mx-auto px-8">
           {/* Header */}
           <div className="text-center mb-12">
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 text-primary text-xs font-bold mb-4">
-              <Wrench className="w-3 h-3" />
-              <span>{tool.category}</span>
-            </div>
-            <h1 className="text-4xl font-extrabold mb-4">{tool.seo.metaTitle || tool.slug}</h1>
-            <p className="text-gray-500 font-medium max-w-2xl mx-auto">{tool.shortDescription}</p>
+            {tool.category && (
+              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 text-primary text-xs font-bold mb-4">
+                <Wrench className="w-3 h-3" />
+                <span>{Array.isArray(tool.category) ? tool.category[0] : tool.category}</span>
+              </div>
+            )}
+            <h1 className="text-4xl font-extrabold mb-4">{tool.seo?.metaTitle || tool.slug || "Tool"}</h1>
+            {tool.shortDescription && (
+              <p className="text-gray-500 font-medium max-w-2xl mx-auto">{tool.shortDescription}</p>
+            )}
           </div>
 
           {/* Tool Container */}
-          <div className="bg-white rounded-[2rem] p-8 md:p-12 shadow-sm border border-border-custom mb-12">
-            <div 
-              id={`tool-container-${tool.slug}`}
-              ref={containerRef}
-              dangerouslySetInnerHTML={{ 
-                __html: tool.engine.html.replace('[CONTENT]', '<div id="tool-content-root"></div>') 
-              }}
-            />
-          </div>
+          {tool.engine && tool.slug && (
+            <div className="bg-white rounded-[2rem] p-8 md:p-12 shadow-sm border border-border-custom mb-12">
+              <div 
+                id={`tool-container-${tool.slug}`}
+                ref={containerRef}
+                dangerouslySetInnerHTML={{ 
+                  __html: tool.engine.html.replace('[CONTENT]', '<div id="tool-content-root"></div>') 
+                }}
+              />
+            </div>
+          )}
 
           {/* User Manual / Full Description */}
           {tool.fullDescription && (

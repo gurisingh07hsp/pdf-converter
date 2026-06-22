@@ -1,13 +1,15 @@
 "use client";
 
 import { useState, useEffect } from 'react';
+import Link from 'next/link';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import dynamic from 'next/dynamic';
 import 'react-pdf/dist/Page/AnnotationLayer.css';
 import 'react-pdf/dist/Page/TextLayer.css';
-import { ShieldCheck, Zap, Cloud, Download, RotateCcw, AlertCircle, Trash2 } from 'lucide-react';
+import { ShieldCheck, Zap, Cloud, Download, RotateCcw, AlertCircle, Trash2, ArrowRight } from 'lucide-react';
 import FileUpload from '@/components/FileUpload';
+import { getRelevantTools, Tool } from '@/lib/tools';
 
 // Dynamically import Document and Page with ssr disabled
 const Document = dynamic(() => import('react-pdf').then(mod => mod.Document), { ssr: false });
@@ -21,6 +23,7 @@ export default function RemovePagesPage() {
   const [downloadUrl, setDownloadUrl] = useState<string | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [isSmallScreen, setIsSmallScreen] = useState<boolean>(false);
+  const relevantTools: Tool[] = getRelevantTools('/remove-pages');
 
   // Set up pdfjs worker on client only
   useEffect(() => {
@@ -263,6 +266,63 @@ export default function RemovePagesPage() {
               </div>
             ))}
           </div>
+
+          {/* How it Works */}
+          <section className="mt-20">
+            <div className="mb-8">
+              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 text-primary text-xs font-bold mb-4">
+                <span>How it works</span>
+              </div>
+              <h2 className="text-xl font-bold text-foreground">How to remove pages from PDF</h2>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              {[
+                { title: "Upload your PDF", description: "Select and upload your PDF file." },
+                { title: "Select pages to remove", description: "Click on pages to mark them for deletion." },
+                { title: "Download updated PDF", description: "Download your PDF with selected pages removed." }
+              ].map((step, index) => (
+                <div key={index} className="bg-gray-50 rounded-3xl p-8">
+                  <div className="text-primary font-black text-xl mb-4">Step {index + 1}</div>
+                  <h3 className="font-bold text-foreground mb-2">{step.title}</h3>
+                  <p className="text-sm text-gray-500 leading-relaxed">{step.description}</p>
+                </div>
+              ))}
+            </div>
+          </section>
+
+          {/* Relevant Tools */}
+          <section className="mt-20">
+            <div className="mb-8">
+              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 text-primary text-xs font-bold mb-4">
+                <span>You might also need</span>
+              </div>
+              <h2 className="text-xl font-bold text-foreground">Related tools</h2>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+              {relevantTools.map((tool, index) => (
+                <Link 
+                  key={index} 
+                  href={tool.href}
+                  className="bg-white p-6 rounded-3xl border border-border-custom hover:shadow-2xl hover:shadow-gray-200/50 transition-all cursor-pointer group block relative overflow-hidden"
+                >
+                  <div className="absolute top-0 right-0 p-4 opacity-0 group-hover:opacity-100 transition-opacity">
+                    <ArrowRight className="w-4 h-4 text-primary" />
+                  </div>
+                  <div className={`${tool.bgColor} w-14 h-14 rounded-xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform shadow-sm`}>
+                    <tool.icon className={`w-7 h-7 ${tool.iconColor}`} />
+                  </div>
+                  <h3 className="text-lg font-black text-foreground mb-2 group-hover:text-primary transition-colors">{tool.title}</h3>
+                  <p className="text-sm text-gray-400 leading-relaxed font-medium">
+                    {tool.description}
+                  </p>
+                  <div className="mt-4 inline-flex items-center gap-2 text-xs font-bold text-primary group-hover:gap-3 transition-all">
+                    <span>Use now</span>
+                    <ArrowRight className="w-3 h-3" />
+                  </div>
+                </Link>
+              ))}
+            </div>
+          </section>
         </div>
       </main>
       <Footer />
