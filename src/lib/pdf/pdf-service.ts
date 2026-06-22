@@ -335,4 +335,34 @@ export class PDFService {
             throw new Error('Unlock failed.');
         }
     }
+
+    /**
+     * Remove specific pages from a PDF using pdf-lib
+     */
+    static async removePages(inputPath: string, outputPath: string, pagesToRemove: number[]) {
+        try {
+            const pdfBytes = await Fs.readFile(inputPath);
+            const pdfDoc = await PDFDocument.load(pdfBytes);
+            const newPdfDoc = await PDFDocument.create();
+            const totalPages = pdfDoc.getPageCount();
+
+            // Create a set for O(1) lookups
+            const pagesToRemoveSet = new Set(pagesToRemove.map(p => p - 1)); // convert to 0-indexed
+
+            for (let i = 0; i < totalPages; i++) {
+                if (!pagesToRemoveSet.has(i)) {
+                    const [copiedPage] = await newPdfDoc.copyPages(pdfDoc, [i]);
+                    newPdfDoc.addPage(copiedPage);
+                }
+            }
+
+            const newPdfBytes = await newPdfDoc.save();
+            await Fs.writeFile(outputPath, newPdfBytes);
+
+            return outputPath;
+        } catch (error) {
+            console.error('Remove pages failed:', error);
+            throw new Error('Remove pages failed');
+        }
+    }
 }

@@ -103,17 +103,46 @@ export default function TranslatePage() {
 
   const translateText = useCallback(async (text: string, sourceLang: string, targetLang: string) => {
     try {
-      const langPair = sourceLang === 'auto' ? targetLang : `${sourceLang}|${targetLang}`;
-      const response = await fetch(`https://api.mymemory.translated.net/get?q=${encodeURIComponent(text)}&langpair=${langPair}`);
-      const data = await response.json();
+      // Split text into chunks (MyMemory has a limit of ~5000 chars)
+      const maxChunkSize = 4000;
+      const chunks = [];
+      let currentChunk = '';
       
-      if (data.responseStatus === 200) {
-        return data.responseData.translatedText;
-      } else {
-        throw new Error(data.responseDetails || 'Translation failed');
+      // Split by sentences to avoid breaking meaning
+      const sentences = text.match(/[^.!?]+[.!?]+/g) || [text];
+      
+      for (const sentence of sentences) {
+        if (currentChunk.length + sentence.length > maxChunkSize && currentChunk.length > 0) {
+          chunks.push(currentChunk.trim());
+          currentChunk = '';
+        }
+        currentChunk += sentence;
       }
-    } catch (error) {
-      throw new Error('Translation service unavailable');
+      if (currentChunk.trim()) chunks.push(currentChunk.trim());
+      
+      let translatedText = '';
+      
+      for (const chunk of chunks) {
+        const langPair = sourceLang === 'auto' ? targetLang : `${sourceLang}|${targetLang}`;
+        const response = await fetch(`https://api.mymemory.translated.net/get?q=${encodeURIComponent(chunk)}&langpair=${langPair}`);
+        const data = await response.json();
+        
+        if (data.responseStatus === 200) {
+          translatedText += data.responseData.translatedText + ' ';
+        } else {
+          throw new Error(data.responseDetails || 'Translation failed');
+        }
+        
+        // Add a small delay between requests to avoid rate limiting
+        if (chunks.length > 1) {
+          await new Promise(resolve => setTimeout(resolve, 500));
+        }
+      }
+      
+      return translatedText.trim();
+    } catch (error: any) {
+      console.error('Translate error:', error);
+      throw new Error(error.message || 'Translation service unavailable');
     }
   }, []);
 
@@ -159,7 +188,7 @@ export default function TranslatePage() {
     <>
       <Navbar />
       <main className="grow py-20 bg-surface">
-        <div className="max-w-4xl mx-auto px-8">
+        <div className="max-w-4xl mx-auto px-4 md:px-8">
           <div className="text-center mb-12">
             <h1 className="text-4xl font-extrabold mb-4">Translate PDF</h1>
             <p className="text-gray-500 font-medium">Upload your PDF and translate it to any language, including major Indian languages.</p>

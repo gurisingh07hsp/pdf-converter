@@ -123,7 +123,7 @@ export default function RemovePagesPage() {
                 {/* Page Thumbnails */}
                 <div className="lg:w-2/3 w-full">
                   <h2 className="text-xl md:text-2xl font-bold mb-4 md:mb-6">Select Pages to Remove</h2>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 md:gap-4 max-h-[60vh] overflow-y-auto p-1">
+                  <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 max-h-[60vh] overflow-y-auto p-2">
                     {file && (
                       <Document 
                         file={file}
@@ -133,23 +133,25 @@ export default function RemovePagesPage() {
                           <div 
                             key={index}
                             onClick={() => togglePage(index + 1)}
-                            className={`cursor-pointer rounded-xl overflow-hidden border-2 transition-all ${
+                            className={`cursor-pointer rounded-xl overflow-hidden border-2 transition-all flex flex-col items-center ${
                               pagesToRemove.includes(index + 1) 
                                 ? 'border-red-500 bg-red-50 opacity-60' 
                                 : 'border-gray-200 hover:border-primary'
                             }`}
                           >
-                            <Page 
-                              pageNumber={index + 1} 
-                              scale={isSmallScreen ? 0.3 : 0.5} 
-                              renderAnnotationLayer={false}
-                              renderTextLayer={false}
-                            />
-                            <div className="p-1 md:p-2 text-center text-xs md:text-sm font-bold">
+                            <div className="flex-1 flex items-center justify-center p-2">
+                              <Page 
+                                pageNumber={index + 1} 
+                                scale={isSmallScreen ? 0.25 : 0.4} 
+                                renderAnnotationLayer={false}
+                                renderTextLayer={false}
+                              />
+                            </div>
+                            <div className="p-2 text-center text-sm font-bold bg-white border-t border-gray-100 w-full">
                               Page {index + 1}
                               {pagesToRemove.includes(index + 1) && (
-                                <span className="ml-1 md:ml-2 text-red-500">
-                                  <Trash2 className="w-3 h-3 md:w-4 md:h-4 inline" />
+                                <span className="ml-2 text-red-500">
+                                  <Trash2 className="w-4 h-4 inline" />
                                 </span>
                               )}
                             </div>
@@ -162,17 +164,17 @@ export default function RemovePagesPage() {
 
                 {/* Action Panel */}
                 <div className="lg:w-1/3 w-full">
-                  <div className="bg-gray-50 rounded-2xl p-4 md:p-6 sticky top-20">
-                    <h3 className="font-bold text-base md:text-lg mb-3 md:mb-4">Remove pages</h3>
-                    <div className="text-xs md:text-sm text-gray-500 mb-3 md:mb-4">
+                  <div className="bg-gray-50 rounded-2xl p-6 sticky top-20">
+                    <h3 className="font-bold text-lg mb-4">Remove pages</h3>
+                    <div className="text-sm text-gray-500 mb-4">
                       <p className="mb-2 flex items-center gap-2 p-3 bg-blue-50 rounded-lg text-blue-600">
                         <AlertCircle className="w-4 h-4" />
                         Click on pages to remove from document.
                       </p>
                     </div>
-                    <div className="mb-3 md:mb-4">
-                      <p className="text-xs md:text-sm font-bold text-gray-700 mb-2">Total pages: {numPages}</p>
-                      <p className="text-xs md:text-sm font-bold text-gray-700 break-words">
+                    <div className="mb-4">
+                      <p className="text-sm font-bold text-gray-700 mb-2">Total pages: {numPages}</p>
+                      <p className="text-sm font-bold text-gray-700 break-words">
                         Pages to remove: {pagesToRemove.length > 0 ? pagesToRemove.join(', ') : 'none'}
                       </p>
                     </div>
@@ -180,15 +182,15 @@ export default function RemovePagesPage() {
                       <button 
                         onClick={handleRemovePages} 
                         disabled={pagesToRemove.length === 0}
-                        className="bg-primary text-white px-4 md:px-6 py-2 md:py-3 rounded-xl font-bold flex items-center justify-center gap-2 shadow-xl shadow-primary/20 hover:scale-105 transition-all disabled:opacity-50"
+                        className="bg-primary text-white px-6 py-3 rounded-xl font-bold flex items-center justify-center gap-2 shadow-xl shadow-primary/20 hover:scale-105 transition-all disabled:opacity-50"
                       >
                         Remove pages
-                        <Trash2 className="w-4 h-4 md:w-5 md:h-5" />
+                        <Trash2 className="w-5 h-5" />
                       </button>
                       <button 
-                        onClick={reset} className="text-gray-400 hover:text-foreground font-bold text-xs md:text-sm flex items-center justify-center gap-2 transition-colors"
+                        onClick={reset} className="text-gray-400 hover:text-foreground font-bold text-sm flex items-center justify-center gap-2 transition-colors"
                       >
-                        <RotateCcw className="w-3 h-3 md:w-4 md:h-4" /> Start Over
+                        <RotateCcw className="w-4 h-4" /> Start Over
                       </button>
                     </div>
                   </div>

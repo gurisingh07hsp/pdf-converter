@@ -117,6 +117,14 @@ export async function POST(req: NextRequest,{ params }: { params: Promise<{ tool
         filename = "converted.jpg";
         break;
 
+      case 'remove-pages':
+        const pagesToRemoveStr = formData.get('pagesToRemove');
+        if (!pagesToRemoveStr) throw new Error("No pages specified to remove");
+        const pagesToRemove = JSON.parse(pagesToRemoveStr as string);
+        await PDFService.removePages(inputPaths[0], resultPath, pagesToRemove);
+        filename = "pages_removed.pdf";
+        break;
+
       default:
         throw new Error(`Tool '${tool}' not implemented`);
     }
