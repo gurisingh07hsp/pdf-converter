@@ -1,6 +1,6 @@
 import fs from 'fs';
 import Fs from 'fs/promises';
-import { PDFDocument, ColorTypes, RotationTypes } from 'pdf-lib';
+import { PDFDocument, ColorTypes, RotationTypes, StandardFonts } from 'pdf-lib';
 import path from 'path';
 import { exec } from 'child_process';
 import util from 'util';
@@ -416,6 +416,7 @@ export class PDFService {
             const pdfDoc = await PDFDocument.load(pdfBytes);
             const pages = pdfDoc.getPages();
             const totalPages = pages.length;
+            const font = await pdfDoc.embedFont(StandardFonts.Helvetica);
 
             for (let i = 0; i < totalPages; i++) {
                 const page = pages[i];
@@ -427,39 +428,52 @@ export class PDFService {
                     const { width, height } = page.getSize();
                     const fontSize = 12;
                     const text = `${pageNumber}`;
+                    const margin = options.margin || 20;
+                    const textWidth = font.widthOfTextAtSize(text, fontSize);
 
-                    // Position mapping (similar to iLovePDF)
+                    // Position mapping
                     let x = 0;
                     let y = 0;
 
-                    const margin = options.margin || 20;
                     switch (options.position) {
                         case 'top-left':
                             x = margin;
                             y = height - margin;
                             break;
                         case 'top-center':
-                            x = width / 2;
+                            x = (width - textWidth) / 2;
                             y = height - margin;
                             break;
                         case 'top-right':
-                            x = width - margin;
+                            x = width - margin - textWidth;
                             y = height - margin;
+                            break;
+                        case 'left-center':
+                            x = margin;
+                            y = height / 2;
+                            break;
+                        case 'center':
+                            x = (width - textWidth) / 2;
+                            y = height / 2;
+                            break;
+                        case 'right-center':
+                            x = width - margin - textWidth;
+                            y = height / 2;
                             break;
                         case 'bottom-left':
                             x = margin;
                             y = margin;
                             break;
                         case 'bottom-center':
-                            x = width / 2;
+                            x = (width - textWidth) / 2;
                             y = margin;
                             break;
                         case 'bottom-right':
-                            x = width - margin;
+                            x = width - margin - textWidth;
                             y = margin;
                             break;
                         default:
-                            x = width / 2;
+                            x = (width - textWidth) / 2;
                             y = margin;
                     }
 
@@ -467,6 +481,7 @@ export class PDFService {
                         x: x,
                         y: y,
                         size: fontSize,
+                        font: font,
                         color: { type: ColorTypes.RGB, red: 0, green: 0, blue: 0 },
                         opacity: 1,
                     });
@@ -493,6 +508,7 @@ export class PDFService {
             text?: string;
             imagePath?: string;
             position: string;
+            margin: number;
             rotation: number;
             transparency: number;
             fromPage: number;
@@ -504,6 +520,7 @@ export class PDFService {
             const pdfDoc = await PDFDocument.load(pdfBytes);
             const pages = pdfDoc.getPages();
             const totalPages = pages.length;
+            const font = await pdfDoc.embedFont(StandardFonts.Helvetica);
 
             for (let i = 0; i < totalPages; i++) {
                 const page = pages[i];
@@ -512,12 +529,63 @@ export class PDFService {
                 // Check if page is in range
                 if (pageNumber1Based >= options.fromPage && pageNumber1Based <= options.toPage) {
                     const { width, height } = page.getSize();
+                    const fontSize = 50;
+                    const text = options.text || '';
+                    const margin = options.margin || 20;
+                    const textWidth = font.widthOfTextAtSize(text, fontSize);
 
-                    if (options.type === 'text' && options.text) {
-                        page.drawText(options.text, {
-                            x: width / 2,
-                            y: height / 2,
-                            size: 50,
+                    // Calculate position
+                    let x = 0;
+                    let y = 0;
+
+                    switch (options.position) {
+                        case 'top-left':
+                            x = margin;
+                            y = height - margin;
+                            break;
+                        case 'top-center':
+                            x = (width - textWidth) / 2;
+                            y = height - margin;
+                            break;
+                        case 'top-right':
+                            x = width - margin - textWidth;
+                            y = height - margin;
+                            break;
+                        case 'left-center':
+                            x = margin;
+                            y = height / 2;
+                            break;
+                        case 'center':
+                            x = (width - textWidth) / 2;
+                            y = height / 2;
+                            break;
+                        case 'right-center':
+                            x = width - margin - textWidth;
+                            y = height / 2;
+                            break;
+                        case 'bottom-left':
+                            x = margin;
+                            y = margin;
+                            break;
+                        case 'bottom-center':
+                            x = (width - textWidth) / 2;
+                            y = margin;
+                            break;
+                        case 'bottom-right':
+                            x = width - margin - textWidth;
+                            y = margin;
+                            break;
+                        default:
+                            x = (width - textWidth) / 2;
+                            y = height / 2;
+                    }
+
+                    if (options.type === 'text' && text) {
+                        page.drawText(text, {
+                            x: x,
+                            y: y,
+                            size: fontSize,
+                            font: font,
                             color: { type: ColorTypes.RGB, red: 0.5, green: 0.5, blue: 0.5 },
                             opacity: options.transparency || 0.3,
                             rotate: { type: RotationTypes.Degrees, angle: options.rotation || 0 },

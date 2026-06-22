@@ -26,6 +26,7 @@ export default function AddWatermarkPage() {
     type: 'text' | 'image';
     text: string;
     position: string;
+    margin: number;
     rotation: number;
     transparency: number;
     fromPage: number;
@@ -34,6 +35,7 @@ export default function AddWatermarkPage() {
     type: 'text',
     text: 'Confidential',
     position: 'center',
+    margin: 20,
     rotation: 45,
     transparency: 0.3,
     fromPage: 1,
@@ -114,6 +116,7 @@ export default function AddWatermarkPage() {
       type: 'text',
       text: 'Confidential',
       position: 'center',
+      margin: 20,
       rotation: 45,
       transparency: 0.3,
       fromPage: 1,
@@ -146,7 +149,7 @@ export default function AddWatermarkPage() {
                 {/* Page Thumbnails */}
                 <div className="lg:w-2/3 w-full">
                   <h2 className="text-xl md:text-2xl font-bold mb-4 md:mb-6">Preview PDF</h2>
-                  <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 max-h-[60vh] overflow-y-auto p-2">
+                  <div className="grid grid-cols-2 md:grid-cols-3 gap-4 max-h-[60vh] overflow-y-auto p-2">
                     {file && (
                       <Document 
                         file={file}
@@ -220,6 +223,48 @@ export default function AddWatermarkPage() {
                         />
                       </div>
                     )}
+
+                    {/* Position */}
+                    <div className="mb-4">
+                      <label className="text-sm font-bold text-gray-700 mb-2 block">Position</label>
+                      <div className="grid grid-cols-3 gap-1 mb-2">
+                        {[
+                          { value: 'top-left', label: 'TL' },
+                          { value: 'top-center', label: 'TC' },
+                          { value: 'top-right', label: 'TR' },
+                          { value: 'left-center', label: 'LC' },
+                          { value: 'center', label: 'C' },
+                          { value: 'right-center', label: 'RC' },
+                          { value: 'bottom-left', label: 'BL' },
+                          { value: 'bottom-center', label: 'BC' },
+                          { value: 'bottom-right', label: 'BR' },
+                        ].map((option) => (
+                          <button
+                            key={option.value}
+                            onClick={() => setWatermarkOptions(prev => ({ ...prev, position: option.value }))}
+                            className={`text-sm font-bold px-3 py-4 rounded-lg border-2 transition-all ${
+                              watermarkOptions.position === option.value
+                                ? 'border-primary bg-primary/10 text-primary'
+                                : 'border-gray-200 hover:border-gray-300'
+                            }`}
+                          >
+                            {option.label}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+
+                    {/* Margin */}
+                    <div className="mb-4">
+                      <label className="text-sm font-bold text-gray-700 mb-2 block">Margin (px)</label>
+                      <input
+                        type="number"
+                        min="0"
+                        value={watermarkOptions.margin}
+                        onChange={(e) => setWatermarkOptions(prev => ({ ...prev, margin: parseInt(e.target.value) || 20 }))}
+                        className="w-full p-2 border border-gray-200 rounded-lg text-sm"
+                      />
+                    </div>
 
                     {/* Rotation */}
                     <div className="mb-4">

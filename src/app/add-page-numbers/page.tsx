@@ -134,7 +134,7 @@ export default function AddPageNumbersPage() {
                 {/* Page Thumbnails */}
                 <div className="lg:w-2/3 w-full">
                   <h2 className="text-xl md:text-2xl font-bold mb-4 md:mb-6">Preview PDF</h2>
-                  <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 max-h-[60vh] overflow-y-auto p-2">
+                  <div className="grid grid-cols-2 md:grid-cols-3 gap-4 max-h-[60vh] overflow-y-auto p-2">
                     {file && (
                       <Document 
                         file={file}
