@@ -16,7 +16,9 @@ import {
   FileSpreadsheet,
   Presentation,
   Globe,
-  FileType2
+  FileType2,
+  Trash2,
+  Languages
 } from "lucide-react";
 
 const convertToPdf = [
@@ -39,6 +41,8 @@ const otherTools = [
   { title: "Merge PDF", href: "/merge", icon: Combine, color: "text-orange-500" },
   { title: "Split PDF", href: "/split", icon: Split, color: "text-red-500" },
   { title: "Compress PDF", href: "/compress", icon: Zap, color: "text-orange-600" },
+  { title: "Remove Pages", href: "/remove-pages", icon: Trash2, color: "text-purple-500" },
+  { title: "Translate PDF", href: "/translate", icon: Languages, color: "text-blue-500" },
   { title: "PDF Editor", href: "/edit", icon: FileEdit, color: "text-red-400" },
   { title: "Unlock PDF", href: "/unlock", icon: LockKeyhole, color: "text-pink-500" },
 ];

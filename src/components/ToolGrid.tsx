@@ -16,7 +16,9 @@ import {
   Search,
   Sparkles,
   ArrowRight,
-  Wrench
+  Wrench,
+  Trash2,
+  Languages
 } from "lucide-react";
 
 import Link from "next/link";
@@ -49,6 +51,24 @@ const staticTools = [
     bgColor: "bg-orange-50",
     href: "/compress",
     tags: ["reduce", "shrink", "size"]
+  },
+  {
+    title: "Remove Pages",
+    description: "Select and remove specific pages from your PDF.",
+    icon: Trash2,
+    iconColor: "text-purple-500",
+    bgColor: "bg-purple-50",
+    href: "/remove-pages",
+    tags: ["delete", "remove", "pages"]
+  },
+  {
+    title: "Translate PDF",
+    description: "Translate PDF text to another language, including Indian languages.",
+    icon: Languages,
+    iconColor: "text-blue-500",
+    bgColor: "bg-blue-50",
+    href: "/translate",
+    tags: ["translate", "language", "convert"]
   },
   {
     title: "PDF to Word",
@@ -156,6 +176,8 @@ const popularSearches = [
   "Word to PDF",
   "Compress",
   "Split",
+  "Remove Pages",
+  "Translate PDF",
   "Edit PDF",
   "Unlock"
 ];
