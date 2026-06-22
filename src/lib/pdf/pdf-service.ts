@@ -261,44 +261,59 @@ export class PDFService {
         let cmd = '';
 
         if (process.platform === 'win32') {
-            cmd =
-                '"C:\\Program Files\\LibreOffice\\program\\soffice.exe"';
+            cmd = '"C:\\Program Files\\LibreOffice\\program\\soffice.exe"';
         } else {
-            cmd = await this.getCmd('soffice');
+            // Try libreoffice first, then soffice
+            try {
+                cmd = await this.getCmd('libreoffice');
+            } catch (e) {
+                cmd = await this.getCmd('soffice');
+            }
         }
 
-        const command =
-            `${cmd} --headless --convert-to ${format} ` +
-            `--outdir "${outputDir}" "${inputPath}"`;
+        // Create a temporary subdirectory to avoid conflicting with existing files
+        const tempConvertDir = path.join(outputDir, 'temp_convert_' + Date.now());
+        await fs.promises.mkdir(tempConvertDir, { recursive: true });
+
+        const command = `${cmd} --headless --convert-to ${format} "${inputPath}" --outdir "${tempConvertDir}"`;
 
         console.log('Running command:', command);
+        console.log('Input path exists:', fs.existsSync(inputPath));
+        console.log('Temp convert dir:', tempConvertDir);
 
-        const { stdout, stderr } = await execPromise(command);
-        console.log('LibreOffice stdout:', stdout);
-        console.error('LibreOffice stderr:', stderr);
+        try {
+            const { stdout, stderr } = await execPromise(command, { timeout: 60000 });
+            console.log('LibreOffice stdout:', stdout);
+            console.error('LibreOffice stderr:', stderr);
+        } catch (error) {
+            console.error('LibreOffice command failed:', error);
+        }
 
-        // Let's check the output directory for any new files
-        const filesBefore = new Set(fs.readdirSync(outputDir));
+        // Wait for file to be written
+        await new Promise(r => setTimeout(r, 2000));
+
+        // Check what files were created
+        const files = fs.readdirSync(tempConvertDir);
+        console.log('Files in temp convert dir:', files);
+
+        // Find our converted file
+        const convertedFiles = files.filter(f => f.endsWith('.' + format));
         
-        // Wait a tiny bit to make sure file is written
-        await new Promise(r => setTimeout(r, 500));
-        
-        const filesAfter = fs.readdirSync(outputDir);
-        const newFiles = filesAfter.filter(f => !filesBefore.has(f));
-        
-        if (newFiles.length === 0) {
-            // Fallback to expected filename
-            const expectedFile = path.join(
-                outputDir,
-                path.basename(inputPath).replace(/\.[^/.]+$/, '') + '.' + format
-            );
-            if (fs.existsSync(expectedFile)) {
-                return expectedFile;
-            }
+        if (convertedFiles.length === 0) {
+            await fs.promises.rm(tempConvertDir, { recursive: true });
             throw new Error('LibreOffice conversion did not produce an output file');
         }
 
-        return path.join(outputDir, newFiles[0]);
+        // Move file to output dir
+        const tempOutputPath = path.join(tempConvertDir, convertedFiles[0]);
+        const finalOutputPath = path.join(outputDir, convertedFiles[0]);
+        await fs.promises.rename(tempOutputPath, finalOutputPath);
+
+        // Cleanup temp dir
+        await fs.promises.rm(tempConvertDir, { recursive: true });
+
+        console.log('Final output path:', finalOutputPath);
+        return finalOutputPath;
     }
 
 
