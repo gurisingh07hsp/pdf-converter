@@ -264,25 +264,41 @@ export class PDFService {
             cmd =
                 '"C:\\Program Files\\LibreOffice\\program\\soffice.exe"';
         } else {
-            cmd = 'soffice';
+            cmd = await this.getCmd('soffice');
         }
 
         const command =
             `${cmd} --headless --convert-to ${format} ` +
             `--outdir "${outputDir}" "${inputPath}"`;
 
-        console.log(command);
+        console.log('Running command:', command);
 
-        await execPromise(command);
+        const { stdout, stderr } = await execPromise(command);
+        console.log('LibreOffice stdout:', stdout);
+        console.error('LibreOffice stderr:', stderr);
 
-        const outputFile =
-            path.join(
+        // Let's check the output directory for any new files
+        const filesBefore = new Set(fs.readdirSync(outputDir));
+        
+        // Wait a tiny bit to make sure file is written
+        await new Promise(r => setTimeout(r, 500));
+        
+        const filesAfter = fs.readdirSync(outputDir);
+        const newFiles = filesAfter.filter(f => !filesBefore.has(f));
+        
+        if (newFiles.length === 0) {
+            // Fallback to expected filename
+            const expectedFile = path.join(
                 outputDir,
-                path.basename(inputPath).replace(/\.[^/.]+$/, '')
-                + '.' + format
+                path.basename(inputPath).replace(/\.[^/.]+$/, '') + '.' + format
             );
+            if (fs.existsSync(expectedFile)) {
+                return expectedFile;
+            }
+            throw new Error('LibreOffice conversion did not produce an output file');
+        }
 
-        return outputFile;
+        return path.join(outputDir, newFiles[0]);
     }
 
 
