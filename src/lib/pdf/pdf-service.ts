@@ -320,7 +320,7 @@ export class PDFService {
     //     }
     // }
 
-    static async unlockPDF(inputPath: string,outputPath: string,password?: string) {
+    static async unlockPDF(inputPath: string,outputPath: string, password?: string) {
         const qpdf = await this.getCmd('qpdf');
 
         const command = password
