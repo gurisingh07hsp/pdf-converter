@@ -1,6 +1,6 @@
 import fs from 'fs';
 import Fs from 'fs/promises';
-import { PDFDocument } from 'pdf-lib';
+import { PDFDocument, ColorTypes, RotationTypes, StandardFonts } from 'pdf-lib';
 import path from 'path';
 import { exec } from 'child_process';
 import util from 'util';
@@ -261,28 +261,59 @@ export class PDFService {
         let cmd = '';
 
         if (process.platform === 'win32') {
-            cmd =
-                '"C:\\Program Files\\LibreOffice\\program\\soffice.exe"';
+            cmd = '"C:\\Program Files\\LibreOffice\\program\\soffice.exe"';
         } else {
-            cmd = 'soffice';
+            // Try libreoffice first, then soffice
+            try {
+                cmd = await this.getCmd('libreoffice');
+            } catch (e) {
+                cmd = await this.getCmd('soffice');
+            }
         }
 
-        const command =
-            `${cmd} --headless --convert-to ${format} ` +
-            `--outdir "${outputDir}" "${inputPath}"`;
+        // Create a temporary subdirectory to avoid conflicting with existing files
+        const tempConvertDir = path.join(outputDir, 'temp_convert_' + Date.now());
+        await fs.promises.mkdir(tempConvertDir, { recursive: true });
 
-        console.log(command);
+        const command = `${cmd} --headless --convert-to ${format} "${inputPath}" --outdir "${tempConvertDir}"`;
 
-        await execPromise(command);
+        console.log('Running command:', command);
+        console.log('Input path exists:', fs.existsSync(inputPath));
+        console.log('Temp convert dir:', tempConvertDir);
 
-        const outputFile =
-            path.join(
-                outputDir,
-                path.basename(inputPath).replace(/\.[^/.]+$/, '')
-                + '.' + format
-            );
+        try {
+            const { stdout, stderr } = await execPromise(command, { timeout: 60000 });
+            console.log('LibreOffice stdout:', stdout);
+            console.error('LibreOffice stderr:', stderr);
+        } catch (error) {
+            console.error('LibreOffice command failed:', error);
+        }
 
-        return outputFile;
+        // Wait for file to be written
+        await new Promise(r => setTimeout(r, 2000));
+
+        // Check what files were created
+        const files = fs.readdirSync(tempConvertDir);
+        console.log('Files in temp convert dir:', files);
+
+        // Find our converted file
+        const convertedFiles = files.filter(f => f.endsWith('.' + format));
+        
+        if (convertedFiles.length === 0) {
+            await fs.promises.rm(tempConvertDir, { recursive: true });
+            throw new Error('LibreOffice conversion did not produce an output file');
+        }
+
+        // Move file to output dir
+        const tempOutputPath = path.join(tempConvertDir, convertedFiles[0]);
+        const finalOutputPath = path.join(outputDir, convertedFiles[0]);
+        await fs.promises.rename(tempOutputPath, finalOutputPath);
+
+        // Cleanup temp dir
+        await fs.promises.rm(tempConvertDir, { recursive: true });
+
+        console.log('Final output path:', finalOutputPath);
+        return finalOutputPath;
     }
 
 
@@ -333,6 +364,245 @@ export class PDFService {
         } catch (error) {
             console.error('QPDF decrypt failed:', error);
             throw new Error('Unlock failed.');
+        }
+    }
+
+    /**
+     * Remove specific pages from a PDF using pdf-lib
+     */
+    static async removePages(inputPath: string, outputPath: string, pagesToRemove: number[]) {
+        try {
+            const pdfBytes = await Fs.readFile(inputPath);
+            const pdfDoc = await PDFDocument.load(pdfBytes);
+            const newPdfDoc = await PDFDocument.create();
+            const totalPages = pdfDoc.getPageCount();
+
+            // Create a set for O(1) lookups
+            const pagesToRemoveSet = new Set(pagesToRemove.map(p => p - 1)); // convert to 0-indexed
+
+            for (let i = 0; i < totalPages; i++) {
+                if (!pagesToRemoveSet.has(i)) {
+                    const [copiedPage] = await newPdfDoc.copyPages(pdfDoc, [i]);
+                    newPdfDoc.addPage(copiedPage);
+                }
+            }
+
+            const newPdfBytes = await newPdfDoc.save();
+            await Fs.writeFile(outputPath, newPdfBytes);
+
+            return outputPath;
+        } catch (error) {
+            console.error('Remove pages failed:', error);
+            throw new Error('Remove pages failed');
+        }
+    }
+
+    /**
+     * Add page numbers to a PDF
+     */
+    static async addPageNumbers(
+        inputPath: string,
+        outputPath: string,
+        options: {
+            position: string;
+            margin: number;
+            startNumber: number;
+            fromPage: number;
+            toPage: number;
+        }
+    ) {
+        try {
+            const pdfBytes = await Fs.readFile(inputPath);
+            const pdfDoc = await PDFDocument.load(pdfBytes);
+            const pages = pdfDoc.getPages();
+            const totalPages = pages.length;
+            const font = await pdfDoc.embedFont(StandardFonts.Helvetica);
+
+            for (let i = 0; i < totalPages; i++) {
+                const page = pages[i];
+                const pageNumber = options.startNumber + i;
+                const pageNumber1Based = i + 1;
+
+                // Check if page is in range
+                if (pageNumber1Based >= options.fromPage && pageNumber1Based <= options.toPage) {
+                    const { width, height } = page.getSize();
+                    const fontSize = 12;
+                    const text = `${pageNumber}`;
+                    const margin = options.margin || 20;
+                    const textWidth = font.widthOfTextAtSize(text, fontSize);
+
+                    // Position mapping
+                    let x = 0;
+                    let y = 0;
+
+                    switch (options.position) {
+                        case 'top-left':
+                            x = margin;
+                            y = height - margin;
+                            break;
+                        case 'top-center':
+                            x = (width - textWidth) / 2;
+                            y = height - margin;
+                            break;
+                        case 'top-right':
+                            x = width - margin - textWidth;
+                            y = height - margin;
+                            break;
+                        case 'left-center':
+                            x = margin;
+                            y = height / 2;
+                            break;
+                        case 'center':
+                            x = (width - textWidth) / 2;
+                            y = height / 2;
+                            break;
+                        case 'right-center':
+                            x = width - margin - textWidth;
+                            y = height / 2;
+                            break;
+                        case 'bottom-left':
+                            x = margin;
+                            y = margin;
+                            break;
+                        case 'bottom-center':
+                            x = (width - textWidth) / 2;
+                            y = margin;
+                            break;
+                        case 'bottom-right':
+                            x = width - margin - textWidth;
+                            y = margin;
+                            break;
+                        default:
+                            x = (width - textWidth) / 2;
+                            y = margin;
+                    }
+
+                    page.drawText(text, {
+                        x: x,
+                        y: y,
+                        size: fontSize,
+                        font: font,
+                        color: { type: ColorTypes.RGB, red: 0, green: 0, blue: 0 },
+                        opacity: 1,
+                    });
+                }
+            }
+
+            const newPdfBytes = await pdfDoc.save();
+            await Fs.writeFile(outputPath, newPdfBytes);
+            return outputPath;
+        } catch (error) {
+            console.error('Add page numbers failed:', error);
+            throw new Error('Add page numbers failed');
+        }
+    }
+
+    /**
+     * Add watermark to a PDF
+     */
+    static async addWatermark(
+        inputPath: string,
+        outputPath: string,
+        options: {
+            type: 'text' | 'image';
+            text?: string;
+            imagePath?: string;
+            position: string;
+            margin: number;
+            rotation: number;
+            transparency: number;
+            fromPage: number;
+            toPage: number;
+        }
+    ) {
+        try {
+            const pdfBytes = await Fs.readFile(inputPath);
+            const pdfDoc = await PDFDocument.load(pdfBytes);
+            const pages = pdfDoc.getPages();
+            const totalPages = pages.length;
+            const font = await pdfDoc.embedFont(StandardFonts.Helvetica);
+
+            for (let i = 0; i < totalPages; i++) {
+                const page = pages[i];
+                const pageNumber1Based = i + 1;
+
+                // Check if page is in range
+                if (pageNumber1Based >= options.fromPage && pageNumber1Based <= options.toPage) {
+                    const { width, height } = page.getSize();
+                    const fontSize = 50;
+                    const text = options.text || '';
+                    const margin = options.margin || 20;
+                    const textWidth = font.widthOfTextAtSize(text, fontSize);
+
+                    // Calculate position
+                    let x = 0;
+                    let y = 0;
+
+                    switch (options.position) {
+                        case 'top-left':
+                            x = margin;
+                            y = height - margin;
+                            break;
+                        case 'top-center':
+                            x = (width - textWidth) / 2;
+                            y = height - margin;
+                            break;
+                        case 'top-right':
+                            x = width - margin - textWidth;
+                            y = height - margin;
+                            break;
+                        case 'left-center':
+                            x = margin;
+                            y = height / 2;
+                            break;
+                        case 'center':
+                            x = (width - textWidth) / 2;
+                            y = height / 2;
+                            break;
+                        case 'right-center':
+                            x = width - margin - textWidth;
+                            y = height / 2;
+                            break;
+                        case 'bottom-left':
+                            x = margin;
+                            y = margin;
+                            break;
+                        case 'bottom-center':
+                            x = (width - textWidth) / 2;
+                            y = margin;
+                            break;
+                        case 'bottom-right':
+                            x = width - margin - textWidth;
+                            y = margin;
+                            break;
+                        default:
+                            x = (width - textWidth) / 2;
+                            y = height / 2;
+                    }
+
+                    if (options.type === 'text' && text) {
+                        page.drawText(text, {
+                            x: x,
+                            y: y,
+                            size: fontSize,
+                            font: font,
+                            color: { type: ColorTypes.RGB, red: 0.5, green: 0.5, blue: 0.5 },
+                            opacity: options.transparency || 0.3,
+                            rotate: { type: RotationTypes.Degrees, angle: options.rotation || 0 },
+                        });
+                    } else if (options.type === 'image' && options.imagePath) {
+                        // Handle image watermark if needed
+                        // For now, let's just support text watermark
+                    }
+                }
+            }
+
+            const newPdfBytes = await pdfDoc.save();
+            await Fs.writeFile(outputPath, newPdfBytes);
+            return outputPath;
+        } catch (error) {
+            console.error('Add watermark failed:', error);
+            throw new Error('Add watermark failed');
         }
     }
 }

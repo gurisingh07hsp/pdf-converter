@@ -17,6 +17,12 @@ export default function MergePage() {
         title="Merge PDF" 
         description="Combine multiple PDFs into one document in seconds." 
         apiEndpoint="/api/pdf/merge"
+        toolHref="/merge"
+        howItWorks={[
+          { title: "Select your PDFs", description: "Upload the PDF files you want to merge." },
+          { title: "Arrange order (optional)", description: "Drag and drop to reorder your files if needed." },
+          { title: "Download merged PDF", description: "Click download to get your combined PDF file." }
+        ]}
         acceptedTypes={['.pdf']}
         multiple={true}
       />

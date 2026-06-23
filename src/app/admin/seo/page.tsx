@@ -2,21 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { Save, Globe, Info } from "lucide-react";
-
-const tools = [
-  { id: "merge", name: "Merge PDF" },
-  { id: "split", name: "Split PDF" },
-  { id: "compress", name: "Compress PDF" },
-  { id: "pdf-to-word", name: "PDF to Word" },
-  { id: "pdf-to-jpg", name: "PDF to JPG" },
-  { id: "word-to-pdf", name: "Word to PDF" },
-  { id: "powerpoint-to-pdf", name: "PowerPoint to PDF" },
-  { id: "excel-to-pdf", name: "Excel to PDF" },
-  { id: "html-to-pdf", name: "HTML to PDF" },
-  { id: "pdf-to-powerpoint", name: "PDF to PowerPoint" },
-  { id: "pdf-to-excel", name: "PDF to Excel" },
-  { id: "pdf-to-pdfa", name: "PDF to PDF/A" },
-];
+import { tools } from "@/lib/tools";
 
 interface SEOSettings {
   title: string;
@@ -24,8 +10,13 @@ interface SEOSettings {
   keywords: string;
 }
 
+const toolsList = tools.map((tool) => ({
+  id: tool.slug || "",
+  name: tool.title
+}));
+
 export default function SEOManagement() {
-  const [selectedTool, setSelectedTool] = useState(tools[0].id);
+  const [selectedTool, setSelectedTool] = useState(toolsList[0].id);
   const [settings, setSettings] = useState<Record<string, SEOSettings>>({});
   const [currentSettings, setCurrentSettings] = useState<SEOSettings>({ title: "", description: "", keywords: "" });
   const [isSaving, setIsSaving] = useState(false);
@@ -38,7 +29,13 @@ export default function SEOManagement() {
     if (settings[selectedTool]) {
       setCurrentSettings(settings[selectedTool]);
     } else {
-      setCurrentSettings({ title: "", description: "", keywords: "" });
+      // Try to use default SEO settings from tools.ts if available
+      const tool = tools.find(t => t.slug === selectedTool);
+      setCurrentSettings({ 
+        title: tool?.seo?.metaTitle || "", 
+        description: tool?.seo?.metaDescription || "", 
+        keywords: tool?.seo?.keywords || "" 
+      });
     }
   }, [selectedTool, settings]);
 
@@ -74,8 +71,8 @@ export default function SEOManagement() {
         {/* Tool Selector */}
         <div className="lg:col-span-1 space-y-2">
           <label className="text-xs font-bold text-gray-400 uppercase tracking-widest px-2">Select Tool</label>
-          <div className="bg-white rounded-2xl border border-border-custom overflow-hidden shadow-sm">
-            {tools.map((tool) => (
+          <div className="bg-white rounded-2xl border border-border-custom overflow-hidden shadow-sm max-h-[70vh] overflow-y-auto">
+            {toolsList.map((tool) => (
               <button
                 key={tool.id}
                 onClick={() => setSelectedTool(tool.id)}
@@ -97,7 +94,7 @@ export default function SEOManagement() {
             <div className="flex items-start gap-4 p-4 bg-blue-50 rounded-xl border border-blue-100 mb-2">
               <Info className="w-5 h-5 text-blue-500 mt-0.5" />
               <div>
-                <p className="text-sm font-bold text-blue-900">Editing SEO for: {tools.find(t => t.id === selectedTool)?.name}</p>
+                <p className="text-sm font-bold text-blue-900">Editing SEO for: {toolsList.find(t => t.id === selectedTool)?.name}</p>
                 <p className="text-xs text-blue-700 mt-1">These settings will update the meta tags and search appearance for this specific tool page.</p>
               </div>
             </div>
