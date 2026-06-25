@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import Link from 'next/link';
 import FileUpload from '@/components/FileUpload';
 import { ShieldCheck, Zap, Cloud, Download, RotateCcw, AlertCircle, ArrowRight } from "lucide-react";
@@ -30,11 +30,34 @@ export default function ToolLayout({
   const [progress, setProgress] = useState(0);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const relevantTools: Tool[] = toolHref ? getRelevantTools(toolHref) : tools.slice(0, 4);
+  const progressIntervalRef = useRef<NodeJS.Timeout | null>(null);
+
+  // Clear interval on unmount
+  useEffect(() => {
+    return () => {
+      if (progressIntervalRef.current) {
+        clearInterval(progressIntervalRef.current);
+      }
+    };
+  }, []);
 
   const handleUpload = async (files: File[]) => {
     setStatus('processing');
     setErrorMessage(null);
-    setProgress(30);
+    setProgress(1);
+
+    // Start progress animation
+    if (progressIntervalRef.current) {
+      clearInterval(progressIntervalRef.current);
+    }
+    progressIntervalRef.current = setInterval(() => {
+      setProgress(prev => {
+        if (prev >= 95) {
+          return 95;
+        }
+        return prev + 1;
+      });
+    }, 100);
 
     const formData = new FormData();
     if (multiple) {
@@ -56,25 +79,32 @@ export default function ToolLayout({
 
       const contentType = response.headers.get('content-type');
       
-      if (contentType?.includes('application/pdf')) {
+      // If it's not JSON, treat it as a binary file to download!
+      if (!contentType?.includes('application/json')) {
         const blob = await response.blob();
         const url = window.URL.createObjectURL(blob);
         setDownloadUrl(url);
-      } else if(contentType?.includes('image/jpeg')){
-        const blob = await response.blob();
-        const url = URL.createObjectURL(blob);
-        setDownloadUrl(url);
-      }
-      else {
+      } else {
         const data = await response.json();
         setDownloadUrl(data.downloadUrl);
       }
       
+      // Stop interval and set to 100%
+      if (progressIntervalRef.current) {
+        clearInterval(progressIntervalRef.current);
+      }
       setProgress(100);
       setStatus('success');
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error('Tool error:', err);
-      setErrorMessage(err.message);
+      let message = 'An unexpected error occurred';
+      if (err instanceof Error) {
+        message = err.message;
+      }
+      if (progressIntervalRef.current) {
+        clearInterval(progressIntervalRef.current);
+      }
+      setErrorMessage(message);
       setStatus('error');
     }
   };
@@ -126,7 +156,8 @@ export default function ToolLayout({
               <div className="flex flex-col items-center gap-4">
                 <a 
                   href={downloadUrl!} 
-                  download
+                  // Try to get filename from Content-Disposition or use default
+                  download="output"
                   className="bg-primary text-white px-10 py-4 rounded-xl font-bold flex items-center gap-3 shadow-xl shadow-primary/20 hover:scale-105 transition-all"
                 >
                   <Download className="w-5 h-5" /> Download Result
