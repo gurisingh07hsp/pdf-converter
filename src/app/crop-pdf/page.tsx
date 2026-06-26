@@ -1,9 +1,9 @@
 
 "use client";
 
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, Suspense } from "react";
+import dynamic from "next/dynamic";
 import { PDFDocument } from "pdf-lib";
-import { Document, Page, pdfjs } from "react-pdf";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import FileUpload from "@/components/FileUpload";
@@ -19,8 +19,22 @@ import {
 import Link from "next/link";
 import { getRelevantTools, Tool } from "@/lib/tools";
 
-// Set up PDF.js worker exactly like PDFEditor.tsx
-pdfjs.GlobalWorkerOptions.workerSrc = `//unpkg.com/pdfjs-dist@${pdfjs.version}/build/pdf.worker.min.mjs`;
+// Dynamically import react-pdf components with SSR disabled to prevent DOM errors
+const Document = dynamic(() => import("react-pdf").then((mod) => mod.Document), {
+  ssr: false,
+});
+const Page = dynamic(() => import("react-pdf").then((mod) => mod.Page), {
+  ssr: false,
+});
+
+// Import pdfjs and set worker only on client
+let pdfjs: any;
+if (typeof window !== "undefined") {
+  import("react-pdf").then((mod) => {
+    pdfjs = mod.pdfjs;
+    pdfjs.GlobalWorkerOptions.workerSrc = `//unpkg.com/pdfjs-dist@${pdfjs.version}/build/pdf.worker.min.mjs`;
+  });
+}
 
 export default function CropPDFPage() {
   const [file, setFile] = useState<File | null>(null);
@@ -40,12 +54,14 @@ export default function CropPDFPage() {
   const [startPos, setStartPos] = useState({ x: 0, y: 0 });
   const [startCrop, setStartCrop] = useState({ x: 0, y: 0, width: 0, height: 0 });
   const [crop, setCrop] = useState({ x: 0, y: 0, width: 0, height: 0 });
+  const [isClient, setIsClient] = useState(false);
 
   const containerRef = useRef<HTMLDivElement>(null);
   const relevantTools: Tool[] = getRelevantTools("/crop-pdf");
 
-  // Handle responsive scaling
+  // Check if we're on the client
   useEffect(() => {
+    setIsClient(true);
     const handleResize = () => {
       const width = window.innerWidth;
       if (width < 640) {
@@ -80,7 +96,7 @@ export default function CropPDFPage() {
     setPageSize({ width: viewport.width, height: viewport.height });
   };
 
-  const getMousePosition = (e: React.MouseEvent | MouseEvent) => {
+  const getMousePosition = (e: React.MouseEvent) => {
     const container = containerRef.current;
     if (!container) return { x: 0, y: 0 };
     const rect = container.getBoundingClientRect();
@@ -299,6 +315,25 @@ export default function CropPDFPage() {
     }
   };
 
+  if (!isClient) {
+    return (
+      <div className="flex flex-col min-h-screen">
+        <Navbar />
+        <main className="grow py-10 bg-surface">
+          <div className="max-w-7xl mx-auto px-4 md:px-8">
+            <div className="text-center mb-8">
+              <h1 className="text-4xl font-extrabold mb-2">Crop PDF</h1>
+              <p className="text-gray-500 font-medium">
+                Select the area to crop in your PDF document.
+              </p>
+            </div>
+          </div>
+        </main>
+        <Footer />
+      </div>
+    );
+  }
+
   return (
     <div className="flex flex-col min-h-screen">
       <Navbar />
@@ -332,19 +367,21 @@ export default function CropPDFPage() {
                   onMouseUp={handleMouseUp}
                   onMouseLeave={handleMouseLeave}
                 >
-                  <Document
-                    file={file}
-                    onLoadSuccess={onDocumentLoadSuccess}
-                    className="flex justify-center"
-                  >
-                    <Page
-                      pageNumber={currentPage}
-                      scale={scale}
-                      renderAnnotationLayer={false}
-                      renderTextLayer={false}
-                      onLoadSuccess={onPageLoadSuccess}
-                    />
-                  </Document>
+                  <Suspense fallback={<div className="w-full h-96 flex items-center justify-center">Loading PDF...</div>}>
+                    <Document
+                      file={file}
+                      onLoadSuccess={onDocumentLoadSuccess}
+                      className="flex justify-center"
+                    >
+                      <Page
+                        pageNumber={currentPage}
+                        scale={scale}
+                        renderAnnotationLayer={false}
+                        renderTextLayer={false}
+                        onLoadSuccess={onPageLoadSuccess}
+                      />
+                    </Document>
+                  </Suspense>
 
                   {/* Crop selection box */}
                   {crop.width > 0 && crop.height > 0 && (
@@ -660,3 +697,4 @@ export default function CropPDFPage() {
     </div>
   );
 }
+
