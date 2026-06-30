@@ -43,16 +43,23 @@ const convertFromPdf = [
   { title: "PDF to PDF/A", href: "/convert/pdf-to-pdfa", icon: FileType2, color: "text-blue-600" },
 ];
 
-const otherTools = [
+const organizePdf = [
   { title: "Merge PDF", href: "/merge", icon: Combine, color: "text-orange-500" },
   { title: "Split PDF", href: "/split", icon: Split, color: "text-red-500" },
-  { title: "Compress PDF", href: "/compress", icon: Zap, color: "text-orange-600" },
   { title: "Remove Pages", href: "/remove-pages", icon: Trash2, color: "text-purple-500" },
+]
+
+const editPdf = [
   { title: "Rotate PDF", href: "/rotate-pdf", icon: RotateCw, color: "text-purple-600" },
   { title: "Add Page Numbers", href: "/add-page-numbers", icon: List, color: "text-purple-600" },
   { title: "Add Watermark", href: "/add-watermark", icon: Droplet, color: "text-purple-600" },
-  { title: "Crop PDF", href: "/crop-pdf", icon: Crop, color: "text-purple-600" },
   { title: "PDF Editor", href: "/edit", icon: FileEdit, color: "text-red-400" },
+  { title: "Crop PDF", href: "/crop-pdf", icon: Crop, color: "text-purple-600" },
+
+]
+
+const otherTools = [
+  { title: "Compress PDF", href: "/compress", icon: Zap, color: "text-orange-600" },
   { title: "Unlock PDF", href: "/unlock", icon: LockKeyhole, color: "text-pink-500" },
   { title: "Translate PDF", href: "/translate", icon: Languages, color: "text-blue-500" },
 ];
@@ -83,7 +90,7 @@ export default function Navbar() {
             </button>
 
             {isDropdownOpen && (
-              <div className="absolute top-full left-0 w-[800px] bg-white border border-border-custom rounded-2xl shadow-2xl p-6 mt-0 flex gap-6">
+              <div className="absolute top-full left-0 w-220 bg-white border border-border-custom rounded-2xl shadow-2xl p-6 mt-0 flex gap-6">
                 <div className="flex-1">
                   <div className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-4 px-3">Convert to PDF</div>
                   <div className="flex flex-col gap-1">
@@ -108,6 +115,46 @@ export default function Navbar() {
                   <div className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-4 px-3">Convert from PDF</div>
                   <div className="flex flex-col gap-1">
                     {convertFromPdf.map((tool, i) => (
+                      <Link 
+                        key={i} 
+                        href={tool.href}
+                        className="flex items-center gap-3 p-3 rounded-xl hover:bg-surface transition-all group"
+                      >
+                        <div className={`w-8 h-8 rounded-lg bg-gray-50 flex items-center justify-center group-hover:scale-110 transition-transform`}>
+                          <tool.icon className={`w-4 h-4 ${tool.color}`} />
+                        </div>
+                        <div>
+                          <div className="text-sm font-bold text-foreground">{tool.title}</div>
+                        </div>
+                      </Link>
+                    ))}
+                  </div>
+                </div>
+
+                <div className="flex-1">
+                  <div className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-4 px-3">Organize PDF</div>
+                  <div className="flex flex-col gap-1">
+                    {organizePdf.map((tool, i) => (
+                      <Link 
+                        key={i} 
+                        href={tool.href}
+                        className="flex items-center gap-3 p-3 rounded-xl hover:bg-surface transition-all group"
+                      >
+                        <div className={`w-8 h-8 rounded-lg bg-gray-50 flex items-center justify-center group-hover:scale-110 transition-transform`}>
+                          <tool.icon className={`w-4 h-4 ${tool.color}`} />
+                        </div>
+                        <div>
+                          <div className="text-sm font-bold text-foreground">{tool.title}</div>
+                        </div>
+                      </Link>
+                    ))}
+                  </div>
+                </div>
+
+                <div className="flex-1">
+                  <div className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-4 px-3">Edit PDF</div>
+                  <div className="flex flex-col gap-1">
+                    {editPdf.map((tool, i) => (
                       <Link 
                         key={i} 
                         href={tool.href}
@@ -188,9 +235,16 @@ export default function Navbar() {
 
       {/* Mobile Menu */}
       {isMobileMenuOpen && (
-        <div className="fixed inset-0 z-40 bg-white md:hidden flex flex-col">
+        <div className="fixed inset-0 z-40 bg-white mt-16 md:hidden flex flex-col">
           <div className="flex-1 overflow-y-auto p-4">
             <div className="flex flex-col gap-4 mb-6">
+              <Link 
+                href="/" 
+                onClick={() => setIsMobileMenuOpen(false)} 
+                className="text-sm font-medium text-gray-500 hover:text-foreground transition-colors"
+              >
+                Home
+              </Link>
               <Link 
                 href="/pricing" 
                 onClick={() => setIsMobileMenuOpen(false)} 
@@ -248,6 +302,44 @@ export default function Navbar() {
                 <div className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-2">Convert from PDF</div>
                 <div className="flex flex-col gap-1">
                   {convertFromPdf.map((tool, i) => (
+                    <Link 
+                      key={i} 
+                      href={tool.href}
+                      onClick={() => setIsMobileMenuOpen(false)} 
+                      className="flex items-center gap-3 p-3 rounded-xl hover:bg-surface transition-all"
+                    >
+                      <div className={`w-6 h-6 rounded-lg bg-gray-50 flex items-center justify-center`}>
+                        <tool.icon className={`w-3 h-3 ${tool.color}`} />
+                      </div>
+                      <div className="text-sm font-medium text-foreground">{tool.title}</div>
+                    </Link>
+                  ))}
+                </div>
+              </div>
+
+              <div className="mb-4">
+                <div className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-2">Organize PDF</div>
+                <div className="flex flex-col gap-1">
+                  {organizePdf.map((tool, i) => (
+                    <Link 
+                      key={i} 
+                      href={tool.href}
+                      onClick={() => setIsMobileMenuOpen(false)} 
+                      className="flex items-center gap-3 p-3 rounded-xl hover:bg-surface transition-all"
+                    >
+                      <div className={`w-6 h-6 rounded-lg bg-gray-50 flex items-center justify-center`}>
+                        <tool.icon className={`w-3 h-3 ${tool.color}`} />
+                      </div>
+                      <div className="text-sm font-medium text-foreground">{tool.title}</div>
+                    </Link>
+                  ))}
+                </div>
+              </div>
+
+              <div className="mb-4">
+                <div className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-2">Edit PDF</div>
+                <div className="flex flex-col gap-1">
+                  {editPdf.map((tool, i) => (
                     <Link 
                       key={i} 
                       href={tool.href}
