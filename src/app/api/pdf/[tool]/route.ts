@@ -79,7 +79,8 @@ export async function POST(req: NextRequest,{ params }: { params: Promise<{ tool
         break;
 
       case 'unlock':
-        await PDFService.unlockPDF(inputPaths[0], resultPath);
+        const password = formData.get('password') as string;
+        await PDFService.unlockPDF(inputPaths[0], resultPath, password);
         filename = "unlocked.pdf";
         break;
 
