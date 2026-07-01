@@ -72,7 +72,7 @@ export default function Navbar() {
   return (
     <>
       <nav className="flex items-center justify-between px-4 md:px-8 py-4 border-b border-border-custom bg-white sticky top-0 z-50">
-        <Link href="/" className="flex items-center text-2xl font-bold">
+        <Link href="/" className="flex items-center text-2xl font-bold leading-none">
           <span className="text-primary">PDF</span>
           <span className="text-foreground">Swift</span>
         </Link>
@@ -84,7 +84,7 @@ export default function Navbar() {
             onMouseEnter={() => setIsDropdownOpen(true)}
             onMouseLeave={() => setIsDropdownOpen(false)}
           >
-            <button className="flex items-center gap-1 text-sm font-medium text-gray-500 hover:text-foreground py-2 transition-colors">
+            <button className="flex items-center gap-2 text-sm font-medium text-gray-500 hover:text-foreground py-2 transition-colors leading-none">
               All Tools
               <ChevronDown className={`w-4 h-4 transition-transform ${isDropdownOpen ? 'rotate-180' : ''}`} />
             </button>
@@ -100,12 +100,10 @@ export default function Navbar() {
                         href={tool.href}
                         className="flex items-center gap-3 p-3 rounded-xl hover:bg-surface transition-all group"
                       >
-                        <div className={`w-8 h-8 rounded-lg bg-gray-50 flex items-center justify-center group-hover:scale-110 transition-transform`}>
+                        <div className={`w-8 h-8 rounded-lg bg-gray-50 flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform`}>
                           <tool.icon className={`w-4 h-4 ${tool.color}`} />
                         </div>
-                        <div>
-                          <div className="text-sm font-bold text-foreground">{tool.title}</div>
-                        </div>
+                        <span className="text-sm font-bold text-foreground">{tool.title}</span>
                       </Link>
                     ))}
                   </div>
@@ -120,12 +118,10 @@ export default function Navbar() {
                         href={tool.href}
                         className="flex items-center gap-3 p-3 rounded-xl hover:bg-surface transition-all group"
                       >
-                        <div className={`w-8 h-8 rounded-lg bg-gray-50 flex items-center justify-center group-hover:scale-110 transition-transform`}>
+                        <div className={`w-8 h-8 rounded-lg bg-gray-50 flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform`}>
                           <tool.icon className={`w-4 h-4 ${tool.color}`} />
                         </div>
-                        <div>
-                          <div className="text-sm font-bold text-foreground">{tool.title}</div>
-                        </div>
+                        <span className="text-sm font-bold text-foreground">{tool.title}</span>
                       </Link>
                     ))}
                   </div>
@@ -140,12 +136,10 @@ export default function Navbar() {
                         href={tool.href}
                         className="flex items-center gap-3 p-3 rounded-xl hover:bg-surface transition-all group"
                       >
-                        <div className={`w-8 h-8 rounded-lg bg-gray-50 flex items-center justify-center group-hover:scale-110 transition-transform`}>
+                        <div className={`w-8 h-8 rounded-lg bg-gray-50 flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform`}>
                           <tool.icon className={`w-4 h-4 ${tool.color}`} />
                         </div>
-                        <div>
-                          <div className="text-sm font-bold text-foreground">{tool.title}</div>
-                        </div>
+                        <span className="text-sm font-bold text-foreground">{tool.title}</span>
                       </Link>
                     ))}
                   </div>
@@ -160,12 +154,10 @@ export default function Navbar() {
                         href={tool.href}
                         className="flex items-center gap-3 p-3 rounded-xl hover:bg-surface transition-all group"
                       >
-                        <div className={`w-8 h-8 rounded-lg bg-gray-50 flex items-center justify-center group-hover:scale-110 transition-transform`}>
+                        <div className={`w-8 h-8 rounded-lg bg-gray-50 flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform`}>
                           <tool.icon className={`w-4 h-4 ${tool.color}`} />
                         </div>
-                        <div>
-                          <div className="text-sm font-bold text-foreground">{tool.title}</div>
-                        </div>
+                        <span className="text-sm font-bold text-foreground">{tool.title}</span>
                       </Link>
                     ))}
                   </div>
@@ -178,12 +170,12 @@ export default function Navbar() {
                       <Link 
                         key={i} 
                         href={tool.href}
-                        className="flex items-center gap-3 p-2 rounded-xl hover:bg-surface transition-all group"
+                        className="flex items-center gap-3 p-3 rounded-xl hover:bg-surface transition-all group"
                       >
-                        <div className={`w-6 h-6 rounded bg-gray-50 flex items-center justify-center group-hover:scale-110 transition-transform`}>
-                          <tool.icon className={`w-3 h-3 ${tool.color}`} />
+                        <div className={`w-8 h-8 rounded-lg bg-gray-50 flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform`}>
+                          <tool.icon className={`w-4 h-4 ${tool.color}`} />
                         </div>
-                        <div className="text-[13px] font-medium text-foreground">{tool.title}</div>
+                        <span className="text-sm font-bold text-foreground">{tool.title}</span>
                       </Link>
                     ))}
                   </div>
@@ -192,34 +184,34 @@ export default function Navbar() {
             )}
           </div>
 
-          <Link href="/pricing" className="text-sm font-medium text-gray-500 hover:text-foreground transition-colors">
+          <Link href="/pricing" className="text-sm font-medium text-gray-500 hover:text-foreground transition-colors leading-none">
             Pricing
           </Link>
-          <Link href="/blog" className="text-sm font-medium text-gray-500 hover:text-foreground transition-colors">
+          <Link href="/blog" className="text-sm font-medium text-gray-500 hover:text-foreground transition-colors leading-none">
             Blog
           </Link>
-          <Link href="/about" className="text-sm font-medium text-gray-500 hover:text-foreground transition-colors">
+          <Link href="/about" className="text-sm font-medium text-gray-500 hover:text-foreground transition-colors leading-none">
             About
           </Link>
-          <Link href="/faq" className="text-sm font-medium text-gray-500 hover:text-foreground transition-colors">
+          <Link href="/faq" className="text-sm font-medium text-gray-500 hover:text-foreground transition-colors leading-none">
             FAQ
           </Link>
         </div>
 
         {!user ? (
         <div className="hidden md:flex items-center gap-6">
-          <Link href="/login" className="text-sm cursor-pointer font-medium text-gray-700 hover:text-foreground">
+          <Link href="/login" className="text-sm cursor-pointer font-medium text-gray-700 hover:text-foreground leading-none">
             Log In
           </Link>
           <Link 
             href="/signup" 
-            className="bg-primary cursor-pointer text-white px-6 py-2 rounded-lg text-sm font-semibold hover:bg-opacity-90 transition-all shadow-sm"
+            className="bg-primary cursor-pointer text-white px-6 py-2 rounded-lg text-sm font-semibold hover:bg-opacity-90 transition-all shadow-sm leading-none"
           >
             Sign Up
           </Link>
         </div>
         ) : (
-          <button onClick={logout} className="hidden md:block bg-red-600 cursor-pointer text-white px-6 py-2 rounded-lg text-sm font-semibold hover:bg-opacity-90 transition-all shadow-sm">
+          <button onClick={logout} className="hidden md:block bg-red-600 cursor-pointer text-white px-6 py-2 rounded-lg text-sm font-semibold hover:bg-opacity-90 transition-all shadow-sm leading-none">
             Logout
           </button>
         )}
@@ -363,7 +355,7 @@ export default function Navbar() {
                       key={i} 
                       href={tool.href}
                       onClick={() => setIsMobileMenuOpen(false)} 
-                      className="flex items-center gap-3 p-2 rounded-xl hover:bg-surface transition-all"
+                      className="flex items-center gap-3 p-3 rounded-xl hover:bg-surface transition-all"
                     >
                       <div className={`w-6 h-6 rounded-lg bg-gray-50 flex items-center justify-center`}>
                         <tool.icon className={`w-3 h-3 ${tool.color}`} />
