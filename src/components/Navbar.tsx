@@ -53,7 +53,7 @@ const editPdf = [
   { title: "Rotate PDF", href: "/rotate-pdf", icon: RotateCw, color: "text-purple-600" },
   { title: "Add Page Numbers", href: "/add-page-numbers", icon: List, color: "text-purple-600" },
   { title: "Add Watermark", href: "/add-watermark", icon: Droplet, color: "text-purple-600" },
-  { title: "PDF Editor", href: "/edit", icon: FileEdit, color: "text-red-400" },
+  { title: "PDF Editor", href: "/pdf-editor", icon: FileEdit, color: "text-red-400" },
   { title: "Crop PDF", href: "/crop-pdf", icon: Crop, color: "text-purple-600" },
 
 ]

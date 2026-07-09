@@ -213,6 +213,7 @@ export default function RotatePDFPage() {
               isProcessing={false}
               acceptedTypes={[".pdf"]}
               multiple={false}
+              autoUpload={true}
             />
           )}
 
@@ -220,20 +221,21 @@ export default function RotatePDFPage() {
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
               {/* PDF Preview Area */}
               <div className="lg:col-span-2 bg-white rounded-3xl p-4 md:p-6 shadow-sm">
-                <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-                  <Suspense fallback={<div className="col-span-full h-96 flex items-center justify-center">Loading PDF...</div>}>
+                <div className="lg:w-2/3 w-full">
+                  {/* <Suspense fallback={<div className="col-span-full h-96 flex items-center justify-center">Loading PDF...</div>}> */}
+                  <div className="p-2 max-h-[60vh] overflow-y-auto">
                     <Document
                       file={file}
                       onLoadSuccess={onDocumentLoadSuccess}
-                      className="flex flex-wrap gap-4"
+                      className="pdf-thumbnail-row"
                     >
                       {Array.from(new Array(numPages), (_, i) => (
                         <div
                           key={i + 1}
-                          className="relative group cursor-pointer"
+                          className="relative group cursor-pointer overflow-hidden border-2 transition-all flex flex-col items-center"
                         >
                           <div
-                            className="relative overflow-hidden rounded-xl bg-gray-50 border border-gray-200"
+                            className="flex-1 flex items-center justify-center p-2"
                           >
                             <Page
                               pageNumber={i + 1}
@@ -241,7 +243,7 @@ export default function RotatePDFPage() {
                               rotate={pageRotations[i + 1] || 0}
                               renderAnnotationLayer={false}
                               renderTextLayer={false}
-                              className="rounded-xl"
+                              // className="rounded-xl"
                             />
                           </div>
                           {/* Rotation Controls Hover */}
@@ -267,7 +269,8 @@ export default function RotatePDFPage() {
                         </div>
                       ))}
                     </Document>
-                  </Suspense>
+                  {/* </Suspense> */}
+                  </div>
                 </div>
               </div>
 

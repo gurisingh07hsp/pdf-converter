@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useState, useRef, useEffect, Suspense } from "react";
@@ -352,6 +351,7 @@ export default function CropPDFPage() {
               isProcessing={false}
               acceptedTypes={[".pdf"]}
               multiple={false}
+              autoUpload={true}
             />
           )}
 

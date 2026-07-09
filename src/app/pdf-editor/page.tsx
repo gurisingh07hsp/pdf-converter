@@ -23,7 +23,7 @@ export default function EditPage() {
               <h1 className="text-4xl font-extrabold mb-4">Edit PDF</h1>
               <p className="text-gray-500 font-medium">Add text, shapes, comments and highlights with ease locally.</p>
             </div>
-            <FileUpload onUpload={(files) => setFile(files[0])} isProcessing={false} />
+            <FileUpload onUpload={(files) => setFile(files[0])} isProcessing={false} autoUpload={true} />
             
             <div className="mt-20 grid grid-cols-1 md:grid-cols-3 gap-8">
                {[

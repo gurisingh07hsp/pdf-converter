@@ -94,7 +94,7 @@ const staticTools = [
     icon: FileEdit,
     iconColor: "text-red-400",
     bgColor: "bg-red-50",
-    href: "/edit",
+    href: "/pdf-editor",
     tags: ["write", "modify", "annotate"]
   },
   {
@@ -230,7 +230,7 @@ export default function ToolGrid() {
           </div>
 
           <div className="relative max-w-2xl mx-auto group">
-            <div className="absolute -inset-1 bg-gradient-to-r from-primary to-orange-400 rounded-2xl blur opacity-20 group-hover:opacity-30 transition duration-1000 group-hover:duration-200"></div>
+            <div className="absolute -inset-1 bg-linear-to-r from-primary to-orange-400 rounded-2xl blur opacity-20 group-hover:opacity-30 transition duration-1000 group-hover:duration-200"></div>
             <div className="relative flex items-center bg-white rounded-2xl border border-border-custom shadow-xl overflow-hidden">
               <div className="pl-6">
                 <Search className="w-6 h-6 text-gray-400" />
