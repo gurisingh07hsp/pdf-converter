@@ -125,7 +125,7 @@ export default function ToolManagement() {
       </div>
 
       {isEditing && (
-        <div className="bg-white rounded-[2rem] border border-border-custom shadow-sm overflow-hidden animate-in fade-in slide-in-from-top-4 duration-300">
+        <div className="bg-white rounded-4xl border border-border-custom shadow-sm overflow-hidden animate-in fade-in slide-in-from-top-4 duration-300">
           <div className="p-8 border-b border-border-custom bg-gray-50/50">
             <h2 className="text-lg font-bold text-foreground">{currentTool.id ? "Edit Tool" : "Add New Tool"}</h2>
           </div>
@@ -214,7 +214,7 @@ export default function ToolManagement() {
                   rows={10}
                   value={currentTool.fullDescription}
                   onChange={(e) => setCurrentTool({ ...currentTool, fullDescription: e.target.value })}
-                  className={`w-full bg-white px-6 py-4 text-sm focus:outline-none resize-none min-h-[250px] ${activeTab === "code" ? "font-mono bg-gray-900 text-green-400" : ""}`}
+                  className={`w-full bg-white px-6 py-4 text-sm focus:outline-none resize-none min-h-62.5 ${activeTab === "code" ? "font-mono bg-gray-900 text-green-400" : ""}`}
                   placeholder={activeTab === "visual" ? "Write the user manual here..." : "<!-- HTML code for description -->"}
                 />
               </div>
@@ -255,7 +255,7 @@ export default function ToolManagement() {
                     ...currentTool, 
                     engine: { ...currentTool.engine!, [activeEngineTab]: e.target.value } 
                   })}
-                  className="w-full bg-[#1e1e1e] text-gray-300 p-8 pt-14 text-sm font-mono focus:outline-none resize-none min-h-[400px]"
+                  className="w-full bg-[#1e1e1e] text-gray-300 p-8 pt-14 text-sm font-mono focus:outline-none resize-none min-h-100"
                   spellCheck={false}
                 />
               </div>
@@ -323,7 +323,7 @@ export default function ToolManagement() {
       {!isEditing && (
         <div className="grid grid-cols-1 gap-4">
           {tools.map((tool) => (
-            <div key={tool.id} className="bg-white p-6 rounded-[1.5rem] border border-border-custom shadow-sm flex items-center justify-between group hover:border-primary/20 transition-all">
+            <div key={tool.id} className="bg-white p-6 rounded-3xl border border-border-custom shadow-sm flex items-center justify-between group hover:border-primary/20 transition-all">
               <div className="flex items-center gap-6">
                 <div className="w-16 h-16 bg-surface rounded-xl flex items-center justify-center">
                   <Wrench className="w-6 h-6 text-gray-200" />
@@ -355,7 +355,7 @@ export default function ToolManagement() {
             </div>
           ))}
           {tools.length === 0 && (
-            <div className="text-center py-32 bg-white rounded-[2rem] border border-dashed border-border-custom">
+            <div className="text-center py-32 bg-white rounded-4xl border border-dashed border-border-custom">
               <div className="w-20 h-20 bg-gray-50 rounded-full flex items-center justify-center mx-auto mb-6">
                 <Plus className="w-10 h-10 text-gray-200" />
               </div>

@@ -70,6 +70,7 @@ export default function UnlockPDFPage() {
               isProcessing={false} 
               acceptedTypes={['.pdf']}
               multiple={false}
+              autoUpload={true}
             />
           )}
 
