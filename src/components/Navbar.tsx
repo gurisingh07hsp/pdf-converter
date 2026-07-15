@@ -196,6 +196,11 @@ export default function Navbar() {
           <Link href="/faq" className="text-sm font-medium text-gray-500 hover:text-foreground transition-colors leading-none">
             FAQ
           </Link>
+          {user && user.role == 'admin' && (
+            <Link href={'/admin'} className="text-sm font-medium text-gray-500 hover:text-foreground transition-colors leading-none">
+              Admin
+            </Link>
+          )}
         </div>
 
         {!user ? (
@@ -265,6 +270,16 @@ export default function Navbar() {
               >
                 FAQ
               </Link>
+
+              {user && user.role == 'admin' && (
+                <Link 
+                href="/admin" 
+                onClick={() => setIsMobileMenuOpen(false)} 
+                className="text-sm font-medium text-gray-500 hover:text-foreground transition-colors"
+              >
+                Admin
+              </Link>
+              )} 
             </div>
 
             {/* All Tools for Mobile */}
