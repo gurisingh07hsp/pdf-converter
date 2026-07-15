@@ -1,15 +1,45 @@
+'use client';
 import AdminSidebar from "@/components/admin/AdminSidebar";
+import axios from "axios";
 import { Search, Bell, HelpCircle } from "lucide-react";
-
+import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 export default function AdminLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
+  const [isAdmin, setIsAdmin] = useState(false);
+  const router = useRouter();
+  const fetchIsAdmin = async() => {
+    try{
+      const response = await axios.get('/api/auth/me', {withCredentials: true});
+      if(response.status == 200){
+        console.log('checking admin : ', response.data);
+        if(response.data.user && response.data.user.role == 'admin'){
+          setIsAdmin(true);
+        }
+        else{
+          router.push('/login');
+        }
+      }
+    }catch(error){
+      console.log(error);
+    }
+  }
+
+  useEffect(()=> {
+    fetchIsAdmin();
+  },[])
+
+  if(!isAdmin){
+    <div className="w-screen h-screen flex justify-center items-center">Loading...</div>
+  }
+
   return (
     <div className="flex min-h-screen bg-surface">
       <AdminSidebar />
-      <div className="flex-grow flex flex-col">
+      <div className="grow flex flex-col">
         {/* Top Header */}
         <header className="h-20 bg-white border-b border-border-custom flex items-center justify-between px-8 sticky top-0 z-40">
           <div className="flex items-center gap-4 bg-surface border border-border-custom px-4 py-2 rounded-xl w-96">
@@ -40,7 +70,7 @@ export default function AdminLayout({
         </header>
 
         {/* Main Content Area */}
-        <main className="flex-grow p-8">
+        <main className="grow p-8">
           {children}
         </main>
       </div>

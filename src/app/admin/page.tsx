@@ -70,7 +70,7 @@ export default function AdminOverview() {
       {/* Stats Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         {stats.map((stat) => (
-          <div key={stat.name} className="bg-white p-6 rounded-[2rem] border border-border-custom shadow-sm hover:shadow-xl hover:shadow-gray-200/50 transition-all group">
+          <div key={stat.name} className="bg-white p-6 rounded-4xl border border-border-custom shadow-sm hover:shadow-xl hover:shadow-gray-200/50 transition-all group">
             <div className="flex justify-between items-start mb-6">
               <div className={cn("w-12 h-12 rounded-2xl flex items-center justify-center group-hover:scale-110 transition-transform", stat.bgColor)}>
                 <stat.icon className={cn("w-6 h-6", stat.color)} />

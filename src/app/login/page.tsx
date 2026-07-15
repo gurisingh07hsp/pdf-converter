@@ -27,6 +27,7 @@ export default function LoginPage() {
 
       if(res.status === 200){
         setUser(res.data.user);
+        router.push('/');
         setForm({ email: "", password: "" });
         setError("");
 
