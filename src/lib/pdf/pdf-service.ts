@@ -1,3 +1,4 @@
+import JSZip from "jszip";
 import fs from 'fs';
 import Fs from 'fs/promises';
 import { PDFDocument, ColorTypes, RotationTypes, StandardFonts } from 'pdf-lib';
@@ -236,25 +237,91 @@ export class PDFService {
     /**
      * Universal converter using LibreOffice
      */
-    // static async convertWithLibreOffice(inputPath: string, outputDir: string, format: string = 'pdf') {
-    //     let cmd ='"C:\\Program Files\\LibreOffice\\program\\soffice.exe"';
-    //     if (fs.existsSync('/Applications/LibreOffice.app/Contents/MacOS/soffice')) {
-    //         cmd = '/Applications/LibreOffice.app/Contents/MacOS/soffice';
-    //     } else if (await this.checkCommand('soffice')) {
-    //         cmd = 'soffice';
-    //     }
+    static async convertPDFToPPT(inputPath: string, outputDir: string, format: string = 'pdf') {
+        let cmd = '';
 
-    //     const command = `${cmd} --headless --convert-to ${format} --outdir "${outputDir}" "${inputPath}"`;
+        if (process.platform === 'win32') {
+            cmd = '"C:\\Program Files\\LibreOffice\\program\\soffice.exe"';
+        } else {
+            // Try libreoffice first, then soffice
+            try {
+                cmd = await this.getCmd('libreoffice');
+            } catch (e) {
+                cmd = await this.getCmd('soffice');
+            }
+        }
+        const command = `${cmd} --infilter="impress_pdf_import" --convert-to pptx:"Impress MS PowerPoint 2007 XML" --outdir ${outputDir} ${inputPath}`;
+        // const command = `${cmd} --headless --convert-to ${format} --outdir "${outputDir}" "${inputPath}"`;
         
-    //     try {
-    //         await execPromise(command);
-    //         const fileName = path.basename(inputPath).replace(/\.[^/.]+$/, "") + "." + format;
-    //         return path.join(outputDir, fileName);
-    //     } catch (error) {
-    //         console.error('LibreOffice conversion failed:', error);
-    //         throw new Error(`Conversion to ${format} failed. Please ensure LibreOffice is installed.`);
-    //     }
-    // }
+        try {
+            await execPromise(command);
+            const fileName = path.basename(inputPath).replace(/\.[^/.]+$/, "") + "." + format;
+            return path.join(outputDir, fileName);
+        } catch (error) {
+            console.error('LibreOffice conversion failed:', error);
+            throw new Error(`Conversion to ${format} failed. Please ensure LibreOffice is installed.`);
+        }
+    }
+
+    static async createZip(files: string[], zipPath: string) {
+      const zip = new JSZip();
+
+    for (const file of files) {
+        const data = await Fs.readFile(file);
+        zip.file(path.basename(file), data);
+    }
+
+    const buffer = await zip.generateAsync({
+        type: "nodebuffer",
+        compression: "DEFLATE",
+        compressionOptions: {
+            level: 9,
+        },
+    });
+
+    await Fs.writeFile(zipPath, buffer);
+
+    return zipPath;
+    }
+
+
+
+    static async convertPDFToTIFF(inputPath: string, outputDir: string, format: string = 'pdf') {
+        const gs = await this.getCmd('gs');
+    // const gs =
+    //     process.platform === "win32"
+    //         ? '"C:\\Program Files\\gs\\gs10.07.1\\bin\\gswin64c.exe"'
+    //         : "gs";
+
+    const outputPattern = path.join(outputDir, "Page-%d.tif");
+
+        const command =
+            `${gs} ` +
+            `-dSAFER -dBATCH -dNOPAUSE ` +
+            `-r300 ` +
+            `-sDEVICE=tiffscaled24 ` +
+            `-sCompression=lzw ` +
+            `-dTextAlphaBits=4 ` +
+            `-dGraphicsAlphaBits=4 ` +
+            `-sOutputFile="${outputPattern}" ` +
+            `-f "${inputPath}"`;
+
+        await execPromise(command);
+
+        const tiffFiles = fs
+            .readdirSync(outputDir)
+            .filter(file => file.toLowerCase().endsWith(".tif"))
+            .sort()
+            .map(file => path.join(outputDir, file));
+
+        if (tiffFiles.length === 0) {
+            throw new Error("No TIFF files generated.");
+        }
+
+        return tiffFiles;
+    }
+
+
 
 
     static async convertWithLibreOffice(inputPath: string, outputDir: string, format: string = 'pdf') {

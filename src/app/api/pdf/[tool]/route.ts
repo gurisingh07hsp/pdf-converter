@@ -107,10 +107,36 @@ export async function POST(req: NextRequest,{ params }: { params: Promise<{ tool
         break;
 
       case 'pdf-to-powerpoint':
-        resultPath = await PDFService.convertWithLibreOffice(inputPaths[0], uploadDir, 'pptx');
+        resultPath = await PDFService.convertPDFToPPT(inputPaths[0], uploadDir, 'pptx');
         contentType = "application/vnd.openxmlformats-officedocument.presentationml.presentation";
         filename = "converted.pptx";
         break;
+
+    case "pdf-to-tiff": {
+      const tiffFiles = await PDFService.convertPDFToTIFF(
+          inputPaths[0],
+          uploadDir
+      );
+
+      resultPath = path.join(uploadDir, `${tempId}_images.zip`);
+
+      // ✅ Create ZIP
+      await PDFService.createZip(tiffFiles, resultPath);
+
+      console.log("ZIP exists:", fs.existsSync(resultPath));
+
+      contentType = "application/zip";
+      filename = "images.zip";
+
+      // Delete TIFFs AFTER ZIP is created
+      for (const file of tiffFiles) {
+          if (fs.existsSync(file)) {
+              await unlink(file);
+          }
+      }
+
+      break;
+  }
 
       case 'pdf-to-jpg':
         resultPath = await PDFService.convertWithLibreOffice(inputPaths[0], uploadDir, 'jpg');

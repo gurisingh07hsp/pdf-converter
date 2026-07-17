@@ -39,6 +39,7 @@ const convertFromPdf = [
   { title: "PDF to JPG", href: "/convert/pdf-to-jpg", icon: ImageIcon, color: "text-yellow-500" },
   { title: "PDF to Word", href: "/convert/pdf-to-word", icon: FileText, color: "text-blue-500" },
   { title: "PDF to PowerPoint", href: "/convert/pdf-to-powerpoint", icon: Presentation, color: "text-orange-500" },
+  { title: "PDF to TIFF", href: "/convert/pdf-to-tiff", icon: ImageIcon, color: "text-orange-500" },
   { title: "PDF to Excel", href: "/convert/pdf-to-excel", icon: FileSpreadsheet, color: "text-green-500" },
   { title: "PDF to PDF/A", href: "/convert/pdf-to-pdfa", icon: FileType2, color: "text-blue-600" },
 ];
