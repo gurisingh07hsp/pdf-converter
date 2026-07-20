@@ -93,13 +93,23 @@ export async function POST(req: NextRequest,{ params }: { params: Promise<{ tool
         filename = "converted.pdf";
         break;
 
+
+      case 'txt-to-pdf':
+        resultPath = await PDFService.convertTXTToPPT(inputPaths[0], uploadDir, 'pdf');
+        filename = "converted.pdf";
+        break;
+
       case 'pdf-to-word':
-        console.log('main run.....');
-        resultPath = await PDFService.convertWithLibreOffice(inputPaths[0], uploadDir, 'docx');
+        resultPath = await PDFService.convertPDFToWord(inputPaths[0], uploadDir, 'docx');
         contentType = "application/vnd.openxmlformats-officedocument.wordprocessingml.document";
         filename = "converted.docx";
         break;
 
+      case 'pdf-to-txt':
+        resultPath = await PDFService.convertPDFToTXT(inputPaths[0], uploadDir, 'txt');
+        contentType = "text/plain";
+        filename = "converted.txt";
+        break;
       case 'pdf-to-excel':
         resultPath = await PDFService.convertWithLibreOffice(inputPaths[0], uploadDir, 'xlsx');
         contentType = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";

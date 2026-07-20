@@ -24,7 +24,8 @@ import {
   Droplet,
   Crop,
   Menu,
-  X
+  X,
+  Text
 } from "lucide-react";
 
 const convertToPdf = [
@@ -33,6 +34,7 @@ const convertToPdf = [
   { title: "PowerPoint to PDF", href: "/convert/powerpoint-to-pdf", icon: Presentation, color: "text-orange-500" },
   { title: "Excel to PDF", href: "/convert/excel-to-pdf", icon: FileSpreadsheet, color: "text-green-500" },
   { title: "HTML to PDF", href: "/convert/html-to-pdf", icon: Globe, color: "text-yellow-600" },
+  { title: "TXT to PDF", href: "/convert/txt-to-pdf", icon: Text, color: "text-gray-600" },
 ];
 
 const convertFromPdf = [
@@ -40,8 +42,9 @@ const convertFromPdf = [
   { title: "PDF to Word", href: "/convert/pdf-to-word", icon: FileText, color: "text-blue-500" },
   { title: "PDF to PowerPoint", href: "/convert/pdf-to-powerpoint", icon: Presentation, color: "text-orange-500" },
   { title: "PDF to TIFF", href: "/convert/pdf-to-tiff", icon: ImageIcon, color: "text-orange-500" },
-  { title: "PDF to Excel", href: "/convert/pdf-to-excel", icon: FileSpreadsheet, color: "text-green-500" },
+  // { title: "PDF to Excel", href: "/convert/pdf-to-excel", icon: FileSpreadsheet, color: "text-green-500" },
   { title: "PDF to PDF/A", href: "/convert/pdf-to-pdfa", icon: FileType2, color: "text-blue-600" },
+  { title: "PDF to TXT", href: "/convert/pdf-to-txt", icon: Text, color: "text-gray-600" },
 ];
 
 const organizePdf = [

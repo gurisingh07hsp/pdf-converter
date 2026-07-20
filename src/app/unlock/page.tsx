@@ -11,6 +11,7 @@ import { getRelevantTools, Tool } from "@/lib/tools";
 export default function UnlockPDFPage() {
   const [file, setFile] = useState<File | null>(null);
   const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
   const [status, setStatus] = useState<'idle' | 'uploaded' | 'processing' | 'success' | 'error'>('idle');
   const [downloadUrl, setDownloadUrl] = useState<string | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
@@ -25,6 +26,11 @@ export default function UnlockPDFPage() {
 
   const handleUnlock = async () => {
     if (!file) return;
+
+    if(password !== confirmPassword){
+      setErrorMessage("Password do not Match");
+      return;
+    }
     setStatus('processing');
     setErrorMessage(null);
 
@@ -95,7 +101,16 @@ export default function UnlockPDFPage() {
                   placeholder="Enter PDF password"
                   className="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-blue-500"
                 />
+                <input
+                  type="password"
+                  value={confirmPassword}
+                  onChange={(e) => setConfirmPassword(e.target.value)}
+                  placeholder="Confirm Password"
+                  className="w-full px-4 py-3 border mt-2 border-gray-200 rounded-xl text-sm focus:outline-none focus:border-blue-500"
+                />
                 <p className="text-xs text-gray-500 mt-2">Leave blank if the PDF is not password protected.</p>
+
+                <p className='text-center mt-2 bg-red-100 rounded-2xl py-1 text-red-600'>{errorMessage}</p>
               </div>
 
               <div className="flex gap-4">

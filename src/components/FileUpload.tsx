@@ -258,7 +258,7 @@ export default function FileUpload({
           className="cursor-pointer block"
         >
           <p className="text-sm font-bold text-gray-500 mb-2">
-            {multiple ? "Choose PDF files" : "Choose a PDF file"} <br />
+            {multiple ? "Choose files" : "Choose a file"} <br />
             <span className="text-gray-300 font-medium text-xs font-jakarta">or drag and drop it here</span>
           </p>
         </label>

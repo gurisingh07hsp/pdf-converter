@@ -385,6 +385,87 @@ export class PDFService {
 
 
 
+      static async convertTXTToPPT(inputPath: string, outputDir: string, format: string = 'pdf') {
+        let cmd = '';
+
+        if (process.platform === 'win32') {
+            cmd = '"C:\\Program Files\\LibreOffice\\program\\soffice.exe"';
+        } else {
+            // Try libreoffice first, then soffice
+            try {
+                cmd = await this.getCmd('libreoffice');
+            } catch (e) {
+                cmd = await this.getCmd('soffice');
+            }
+        }
+
+        const command = `${cmd} --headless --invisible --convert-to pdf:writer_pdf_Export --outdir ${outputDir} ${inputPath}`;
+        
+        try {
+            await execPromise(command);
+            const fileName = path.basename(inputPath).replace(/\.[^/.]+$/, "") + "." + format;
+            return path.join(outputDir, fileName);
+        } catch (error) {
+            console.error('LibreOffice conversion failed:', error);
+            throw new Error(`Conversion to ${format} failed. Please ensure LibreOffice is installed.`);
+        }
+    }
+
+      static async convertPDFToTXT(inputPath: string, outputDir: string, format: string = 'txt') {
+       const gs = await this.getCmd('gs');
+        // const gs =
+        //     process.platform === "win32"
+        //     ? '"C:\\Program Files\\gs\\gs10.07.1\\bin\\gswin64c.exe"'
+        //     : "gs";
+            const fileName = path.basename(inputPath).replace(/\.[^/.]+$/, "") + "." + format;
+            const outputPath = path.join(outputDir, fileName);
+
+        const command = `${gs} -sDEVICE=txtwrite -dNOPAUSE -dBATCH -q -dTextFormat=3 \
+                            -sOutputFile=${outputPath} \
+                            -f ${inputPath}`;
+        
+          try {
+            await execPromise(command);
+
+            if (!fs.existsSync(outputPath)) {
+                throw new Error(`Expected output file was not created: ${outputPath}`);
+            }
+
+            return outputPath;
+        } catch (error) {
+            console.error('GS conversion failed:', error);
+            throw new Error(`Conversion to ${format} failed. Please ensure GS is installed.`);
+        }
+    }
+
+    static async convertPDFToWord(inputPath: string, outputDir: string, format: string = 'docx'){
+        const gs = await this.getCmd('gs');
+        // const gs =
+        //     process.platform === "win32"
+        //     ? '"C:\\Program Files\\gs\\gs10.07.1\\bin\\gswin64c.exe"'
+        //     : "gs";
+
+        //     console.log('GS : ', gs);
+
+            const fileName = path.basename(inputPath).replace(/\.[^/.]+$/, "") + "." + format;
+            const outputPath = path.join(outputDir, fileName);
+
+            const command = `${gs} -sDEVICE=docxwrite -o "${outputPath}" "${inputPath}"`;
+        
+        try {
+            await execPromise(command);
+
+            if (!fs.existsSync(outputPath)) {
+                throw new Error(`Expected output file was not created: ${outputPath}`);
+            }
+
+            return outputPath;
+        } catch (error) {
+            console.error('GS conversion failed:', error);
+            throw new Error(`Conversion to ${format} failed. Please ensure GS is installed.`);
+        }
+    }
+
 
     /**
      * Convert PDF to PDF/A using Ghostscript
