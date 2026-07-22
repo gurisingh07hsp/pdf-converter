@@ -6,7 +6,7 @@ FROM node:20-bookworm-slim
     RUN apt-get update && apt-get install -y --no-install-recommends \
     wget \
     ca-certificates \
-    && update-ca-certificates
+    && update-ca-certificates\
     libreoffice \
     ghostscript \
     tesseract-ocr \
