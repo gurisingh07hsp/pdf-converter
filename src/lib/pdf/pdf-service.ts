@@ -440,12 +440,6 @@ export class PDFService {
 
     static async convertPDFToWord(inputPath: string, outputDir: string, format: string = 'docx'){
         const gs = await this.getCmd('gs');
-        // const gs =
-        //     process.platform === "win32"
-        //     ? '"C:\\Program Files\\gs\\gs10.07.1\\bin\\gswin64c.exe"'
-        //     : "gs";
-
-        //     console.log('GS : ', gs);
 
             const fileName = path.basename(inputPath).replace(/\.[^/.]+$/, "") + "." + format;
             const outputPath = path.join(outputDir, fileName);
@@ -460,9 +454,11 @@ export class PDFService {
             }
 
             return outputPath;
-        } catch (error) {
-            console.error('GS conversion failed:', error);
-            throw new Error(`Conversion to ${format} failed. Please ensure GS is installed.`);
+        } catch (error: any) {
+            console.error("Command:", command);
+            console.error("stdout:", error.stdout);
+            console.error("stderr:", error.stderr);
+            throw error;
         }
     }
 
