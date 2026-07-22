@@ -441,6 +441,17 @@ export class PDFService {
     static async convertPDFToWord(inputPath: string, outputDir: string, format: string = 'docx'){
         const gs = await this.getCmd('gs');
 
+        console.log("GS command:", gs);
+
+        const { stdout: whichOut } = await execPromise("which gs");
+        console.log("which gs:", whichOut);
+
+        const { stdout: versionOut } = await execPromise(`${gs} --version`);
+        console.log("GS Version:", versionOut);
+
+        const { stdout: helpOut } = await execPromise(`${gs} -h | grep docx || true`);
+        console.log("GS Devices:", helpOut);
+
             const fileName = path.basename(inputPath).replace(/\.[^/.]+$/, "") + "." + format;
             const outputPath = path.join(outputDir, fileName);
 
