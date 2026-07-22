@@ -3,13 +3,14 @@ FROM node:20-bookworm-slim
 # ===========================
 # Install dependencies
 # ===========================
-RUN apt-get update && apt-get install -y --no-install-recommends \
-libreoffice \
-ghostscript \
-tesseract-ocr \
-poppler-utils \
-qpdf \
-&& rm -rf /var/lib/apt/lists/*
+    RUN apt-get update && apt-get install -y --no-install-recommends \
+    wget \
+    libreoffice \
+    ghostscript \
+    tesseract-ocr \
+    poppler-utils \
+    qpdf \
+    && rm -rf /var/lib/apt/lists/*
 
 
 
