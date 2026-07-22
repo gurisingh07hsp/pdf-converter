@@ -6,6 +6,7 @@ FROM node:20-bookworm-slim
     RUN apt-get update && apt-get install -y --no-install-recommends \
     wget \
     xz-utils \
+    build-essential \
     ca-certificates \
     && update-ca-certificates\
     libreoffice \
