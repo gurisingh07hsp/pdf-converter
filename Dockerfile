@@ -4,27 +4,15 @@ FROM node:20-bookworm-slim
 # Install dependencies
 # ===========================
 RUN apt-get update && apt-get install -y --no-install-recommends \
-    libreoffice \
-    tesseract-ocr \
-    poppler-utils \
-    qpdf \
-    wget \
-    build-essential \
-    make \
-    gcc \
-    g++ \
-    pkg-config \
-    zlib1g-dev \
-    libjpeg-dev \
-    libpng-dev \
-    libtiff-dev \
-    libfontconfig1-dev \
-    libfreetype6-dev \
-    liblcms2-dev \
-    libopenjp2-7-dev \
-    ca-certificates \
-    xz-utils \
-    && rm -rf /var/lib/apt/lists/*
+libreoffice \
+ghostscript \
+tesseract-ocr \
+poppler-utils \
+qpdf \
+&& rm -rf /var/lib/apt/lists/*
+
+
+
 
 # ===========================
 # Install Ghostscript 10.07.1
