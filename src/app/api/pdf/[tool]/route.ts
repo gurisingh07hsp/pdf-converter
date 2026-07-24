@@ -78,6 +78,12 @@ export async function POST(req: NextRequest,{ params }: { params: Promise<{ tool
         filename = "converted_pdfa.pdf";
         break;
 
+      case 'protect-pdf':
+        const protectPassword = formData.get('password') as string;
+        await PDFService.protectPDF(inputPaths[0], resultPath, protectPassword);
+        filename = 'protected.pdf';
+        break;
+
       case 'unlock':
         const password = formData.get('password') as string;
         await PDFService.unlockPDF(inputPaths[0], resultPath, password);
@@ -122,6 +128,18 @@ export async function POST(req: NextRequest,{ params }: { params: Promise<{ tool
         filename = "converted.pptx";
         break;
 
+      case 'tiff-to-pdf':
+        resultPath = await PDFService.convertTIFFToPDF(inputPaths, uploadDir, 'pdf');
+        contentType = 'application/pdf';
+        filename = 'converted.pdf';
+        break;
+
+      case 'repair-pdf':
+        resultPath = await PDFService.repairPDF(inputPaths[0], uploadDir, 'pdf');
+        contentType = 'application/pdf';
+        filename = 'converted.pdf';
+        break;
+
     case "pdf-to-tiff": {
       const tiffFiles = await PDFService.convertPDFToTIFF(
           inputPaths[0],
@@ -147,6 +165,12 @@ export async function POST(req: NextRequest,{ params }: { params: Promise<{ tool
 
       break;
   }
+
+  case 'pdf-to-zip':
+    resultPath = await PDFService.convertPDFToZIP(inputPaths[0], uploadDir);
+    contentType = "application/zip";
+    filename = "converted.zip";
+    break;
 
       case 'pdf-to-jpg':
         resultPath = await PDFService.convertWithLibreOffice(inputPaths[0], uploadDir, 'jpg');

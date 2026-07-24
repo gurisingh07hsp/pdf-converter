@@ -210,28 +210,6 @@ export class PDFService {
         await Fs.writeFile(outputPath, pdfBytes);
 
         return outputPath;
-
-
-        // const cmd = await this.getCmd('libreoffice');
-        // const outputDir = path.dirname(outputPath);
-        
-        // // LibreOffice convert-to pdf handles images well
-        // for (const filePath of filePaths) {
-        //     const command = `${cmd} --headless --convert-to pdf --outdir "${outputDir}" "${filePath}"`;
-        //     await execPromise(command);
-        // }
-
-        // // If multiple images, merge the resulting PDFs
-        // const pdfPaths = filePaths.map(f => path.join(outputDir, path.basename(f).replace(/\.[^/.]+$/, "") + ".pdf"));
-        // if (pdfPaths.length > 1) {
-        //     await this.mergePDFs(pdfPaths, outputPath);
-        //     // Cleanup individual PDFs
-        //     pdfPaths.forEach(p => fs.unlinkSync(p));
-        // } else {
-        //     fs.renameSync(pdfPaths[0], outputPath);
-        // }
-        
-        // return outputPath;
     }
 
     /**
@@ -284,7 +262,50 @@ export class PDFService {
     return zipPath;
     }
 
+    static async convertTIFFToPDF(
+        inputPaths: string[],
+        outputDir: string,
+        format: string = "pdf"
+    ) {
+        const gs = await this.getCmd("gs");
 
+        const outputPath = path.join(outputDir, `converted.${format}`);
+
+        // Sort pages (Page-1.tif, Page-2.tif...)
+        const sortedFiles = inputPaths.sort((a, b) => {
+            const pageA = parseInt(path.basename(a).match(/\d+/)?.[0] || "0");
+            const pageB = parseInt(path.basename(b).match(/\d+/)?.[0] || "0");
+            return pageA - pageB;
+        });
+
+        const inputFiles = sortedFiles
+            .map(file => `"${file}"`)
+            .join(" ");
+
+        const command =
+            `${gs} ` +
+            `-dSAFER ` +
+            `-dBATCH ` +
+            `-dNOPAUSE ` +
+            `-sDEVICE=pdfwrite ` +
+            `-o "${outputPath}" ` +
+            `${inputFiles}`;
+
+        console.log(command);
+
+        try {
+            await execPromise(command);
+
+            if (!fs.existsSync(outputPath)) {
+                throw new Error("PDF was not created.");
+            }
+
+            return outputPath;
+        } catch (err) {
+            console.error("Ghostscript TIFF->PDF failed:", err);
+            throw new Error("TIFF to PDF conversion failed.");
+        }
+    }
 
     static async convertPDFToTIFF(inputPath: string, outputDir: string, format: string = 'pdf') {
         const gs = await this.getCmd('gs');
@@ -321,6 +342,45 @@ export class PDFService {
         return tiffFiles;
     }
 
+    static async repairPDF(
+        inputPath: string,
+        outputDir: string,
+        format: string = "pdf"
+    ) {
+        const gs = await this.getCmd("gs");
+
+        // Create output filename
+        const fileName =
+            path.basename(inputPath, path.extname(inputPath)) +
+            `_repaired.${format}`;
+
+        const outputPath = path.join(outputDir, fileName);
+
+        const command =
+            `${gs} ` +
+            `-dSAFER ` +
+            `-dBATCH ` +
+            `-dNOPAUSE ` +
+            `-sDEVICE=pdfwrite ` +
+            `-dPDFSETTINGS=/prepress ` +
+            `-sOutputFile="${outputPath}" ` +
+            `"${inputPath}"`;
+
+        console.log("Repair command:", command);
+
+        try {
+            await execPromise(command);
+
+            if (!fs.existsSync(outputPath)) {
+                throw new Error("Repaired PDF was not created.");
+            }
+
+            return outputPath;
+        } catch (error) {
+            console.error("Ghostscript repair failed:", error);
+            throw new Error("PDF repair failed.");
+        }
+    }
 
 
 
@@ -490,21 +550,20 @@ export class PDFService {
         }
     }
 
-    /**
-     * Unlock/Decrypt PDF using QPDF
-     */
-    // static async unlockPDF(inputPath: string, outputPath: string) {
-    //     const qpdf = await this.getCmd('qpdf');
-    //     const command = `${qpdf} --decrypt "${inputPath}" "${outputPath}"`;
-        
-    //     try {
-    //         await execPromise(command);
-    //         return outputPath;
-    //     } catch (error) {
-    //         console.error('QPDF decrypt failed:', error);
-    //         throw new Error('Unlock failed. If the file is password protected, QPDF requires the password.');
-    //     }
-    // }
+    static async protectPDF(inputPath: string,outputPath: string, password?: string) {
+        const qpdf = await this.getCmd('qpdf');
+
+        const command = `${qpdf} --encrypt "${password}" "${password}" 256 -- "${inputPath}" "${outputPath}"`;
+
+        try {
+            await execPromise(command);
+            return outputPath;
+        } catch (error) {
+            console.error('QPDF ecrypt failed:', error);
+            throw new Error('Protect failed.');
+        }
+    }
+
 
     static async unlockPDF(inputPath: string,outputPath: string, password?: string) {
         const qpdf = await this.getCmd('qpdf');
@@ -520,6 +579,45 @@ export class PDFService {
             console.error('QPDF decrypt failed:', error);
             throw new Error('Unlock failed.');
         }
+    }
+
+
+    static async convertPDFToZIP(
+        inputPath: string,
+        outputDir: string
+    ): Promise<string> {
+
+        const zip = new JSZip();
+
+        // Read PDF
+        const pdfBuffer = await fs.promises.readFile(inputPath);
+
+        // Add PDF to ZIP
+        zip.file(path.basename(inputPath), pdfBuffer);
+
+        // Generate ZIP
+        const zipBuffer = await zip.generateAsync({
+            type: "nodebuffer",
+            compression: "DEFLATE",
+            compressionOptions: {
+                level: 9,
+            },
+        });
+
+        // Output path
+        const zipPath = path.join(
+            outputDir,
+            `${path.basename(inputPath, path.extname(inputPath))}.zip`
+        );
+
+        // Save ZIP
+        await fs.promises.writeFile(zipPath, zipBuffer);
+
+        if (!fs.existsSync(zipPath)) {
+            throw new Error("ZIP file was not created.");
+        }
+
+        return zipPath;
     }
 
     /**
