@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback, useEffect } from 'react';
+import { useState, useCallback, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
@@ -10,49 +10,161 @@ import 'react-pdf/dist/Page/AnnotationLayer.css';
 import 'react-pdf/dist/Page/TextLayer.css';
 import { ShieldCheck, Zap, Cloud, Download, RotateCcw, AlertCircle, Languages, ArrowRight } from 'lucide-react';
 import { getRelevantTools, Tool } from '@/lib/tools';
-
+import { LanguageSelect } from '@/components/LanguageSelect';
+import jsPDF from 'jspdf';
 // Dynamically import Document from react-pdf with ssr disabled
 const Document = dynamic(() => import('react-pdf').then(mod => mod.Document), { ssr: false });
 
-const languages = [
-  // Indian Languages
-  { code: 'hi', name: 'Hindi' },
-  { code: 'bn', name: 'Bengali' },
-  { code: 'te', name: 'Telugu' },
-  { code: 'ta', name: 'Tamil' },
-  { code: 'mr', name: 'Marathi' },
-  { code: 'gu', name: 'Gujarati' },
-  { code: 'kn', name: 'Kannada' },
-  { code: 'ml', name: 'Malayalam' },
-  { code: 'pa', name: 'Punjabi' },
-  { code: 'as', name: 'Assamese' },
-  { code: 'or', name: 'Odia' },
-  { code: 'sa', name: 'Sanskrit' },
-  // Global Languages
-  { code: 'en', name: 'English' },
-  { code: 'es', name: 'Spanish' },
-  { code: 'fr', name: 'French' },
-  { code: 'de', name: 'German' },
-  { code: 'it', name: 'Italian' },
-  { code: 'pt', name: 'Portuguese' },
-  { code: 'zh', name: 'Chinese' },
-  { code: 'ja', name: 'Japanese' },
-  { code: 'ko', name: 'Korean' },
-  { code: 'ru', name: 'Russian' },
-  { code: 'ar', name: 'Arabic' },
-  { code: 'ur', name: 'Urdu' },
-];
+interface PdfPage {
+  pageNumber: number;
+  width: number;
+  height: number;
+  imageDataUrl: string;
+  lines: TextLine[];
+  text: string;
+}
+
+interface ExtractedPdf {
+  numPages: number;
+  pages: PdfPage[];
+}
+
+interface TextLine {
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+  text: string;
+  translatedText: string;
+}
+
+interface PdfPage {
+  pageNumber: number;
+  width: number;
+  height: number;
+  imageDataUrl: string;
+  lines: TextLine[];
+  text: string;
+}
+
+type TextItem = {
+    /**
+     * - Text content.
+     */
+    str: string;
+    /**
+     * - Text direction: 'ttb', 'ltr' or 'rtl'.
+     */
+    dir: string;
+    /**
+     * - Transformation matrix.
+     */
+    transform: Array<any>;
+    /**
+     * - Width in device space.
+     */
+    width: number;
+    /**
+     * - Height in device space.
+     */
+    height: number;
+    /**
+     * - Font name used by PDF.js for converted font.
+     */
+    fontName: string;
+    /**
+     * - Indicating if the text content is followed by a
+     * line-break.
+     */
+    hasEOL: boolean;
+};
+
+
+type Stage = 'idle' | 'extracting' | 'translating' | 'done' | 'error';
+
 
 export default function TranslatePage() {
-  const [file, setFile] = useState<File | null>(null);
-  const [sourceLang, setSourceLang] = useState<string>('auto');
-  const [targetLang, setTargetLang] = useState<string>('en');
   const [status, setStatus] = useState<'idle' | 'uploaded' | 'processing' | 'success' | 'error'>('idle');
   const [translatedText, setTranslatedText] = useState<string>('');
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [numPages, setNumPages] = useState<number>(0);
   const [pdfjsLib, setPdfjsLib] = useState<any>(null);
   const relevantTools: Tool[] = getRelevantTools('/translate');
+  const [downloading, setDownloading] = useState(false);
+
+
+  const [file, setFile] = useState<File | null>(null);
+  const [sourceLang, setSourceLang] = useState('auto');
+  const [targetLang, setTargetLang] = useState('es');
+  const [stage, setStage] = useState<Stage>('idle');
+  const [error, setError] = useState<string | null>(null);
+
+  const [currentPage, setCurrentPage] = useState(0);
+  const [totalPages, setTotalPages] = useState(0);
+  const [completedPara, setCompletedPara] = useState(0);
+  const [totalPara, setTotalPara] = useState(0);
+
+  const [pages, setPages] = useState<PdfPage[]>([]);
+
+  const abortRef = useRef<AbortController | null>(null);
+
+
+  const handleTranslate = useCallback(async () => {
+    if (!file) return;
+    setError(null);
+    setStatus('processing');
+    setStage('extracting');
+    setCurrentPage(0);
+    setTotalPages(0);
+    setCompletedPara(0);
+    setTotalPara(0);
+    setPages([]);
+
+    abortRef.current = new AbortController();
+
+    try {
+      const extracted = await extractPdfText(file, (page, total) => {
+        setCurrentPage(page);
+        setTotalPages(total);
+      });
+
+      const allText: string[] = [];
+      const refs: { pageIndex: number; lineIndex: number }[] = [];
+      extracted.pages.forEach((p, pi) => {
+        p.lines.forEach((line, li) => {
+          allText.push(line.text);
+          refs.push({ pageIndex: pi, lineIndex: li });
+        });
+      });
+
+      setTotalPara(allText.length);
+      setStage('translating');
+
+      const translated = await translateBatch(
+        allText,
+        sourceLang,
+        targetLang,
+        (completed) => setCompletedPara(completed),
+        abortRef.current.signal
+      );
+
+      console.log('translated : ', translated)
+
+      const resultPages = extracted.pages.map((p) => ({ ...p, lines: [...p.lines] }));
+      refs.forEach((ref, idx) => {
+        resultPages[ref.pageIndex].lines[ref.lineIndex].translatedText = translated[idx];
+      });
+      console.log("result pages : ", resultPages);
+      setPages(resultPages);
+      setStage('done');
+      setStatus('success');
+    } catch (err) {
+      if (err instanceof DOMException && err.name === 'AbortError') return;
+      const message = err instanceof Error ? err.message : 'Something went wrong';
+      setError(message);
+      setStage('error');
+    }
+  }, [file, sourceLang, targetLang]);
 
   // Set up pdfjs on client only
   useEffect(() => {
@@ -70,122 +182,233 @@ export default function TranslatePage() {
     }
   };
 
-  const onDocumentLoadSuccess = useCallback(({ numPages }: { numPages: number }) => {
-    setNumPages(numPages);
-  }, []);
 
-  const extractTextFromPDF = useCallback(async (file: File) => {
-    if (!pdfjsLib) throw new Error('PDF library not loaded yet');
+  async function extractPdfText(
+  file: File,
+  onProgress?: (page: number, total: number) => void
+): Promise<ExtractedPdf> {
+  const buffer = await file.arrayBuffer();
+  const loadingTask = pdfjsLib.getDocument({
+    data: buffer,
+    useSystemFonts: true,
+  cMapUrl: undefined,
+    standardFontDataUrl: undefined,
+  isEvalSupported: false,
+  useWorkerFetch: false,
+  disableFontFace: true,
+  cMapPacked: true,
+  });
 
-    return new Promise<string>((resolve, reject) => {
-      const reader = new FileReader();
-      reader.onload = async (e) => {
-        try {
-          const arrayBuffer = e.target?.result as ArrayBuffer;
-          const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
-          let fullText = '';
-          
-          for (let i = 1; i <= pdf.numPages; i++) {
-            const page = await pdf.getPage(i);
-            const textContent = await page.getTextContent();
-            const pageText = textContent.items
-              .map((item: any) => item.str)
-              .join(' ');
-            fullText += pageText + '\n';
-          }
-          
-          resolve(fullText);
-        } catch (error) {
-          reject(error);
+  const pdf = await loadingTask.promise;
+  const pages: PdfPage[] = [];
+
+  for (let i = 1; i <= pdf.numPages; i++) {
+    const page = await pdf.getPage(i);
+    const viewport = page.getViewport({ scale: 1 });
+
+    const renderScale = 2;
+    const renderViewport = page.getViewport({ scale: renderScale });
+    const canvas = document.createElement('canvas');
+    canvas.width = renderViewport.width;
+    canvas.height = renderViewport.height;
+    const ctx = canvas.getContext('2d');
+    if (ctx) {
+      ctx.fillStyle = '#ffffff';
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      await page.render({ canvasContext: ctx, viewport: renderViewport }).promise;
+    }
+    const imageDataUrl = canvas.toDataURL('image/jpeg', 0.85);
+
+    const content = await page.getTextContent();
+    const rawItems = (content.items as TextItem[]).filter((it) => 'str' in it && it.str.length > 0);
+
+    const lineMap = new Map<number, TextItem[]>();
+    const yTolerance = 3;
+    const sortedByY = [...rawItems].sort((a, b) => b.transform[5] - a.transform[5]);
+
+    for (const item of sortedByY) {
+      const y = item.transform[5];
+      let placed = false;
+      for (const keyY of lineMap.keys()) {
+        if (Math.abs(y - keyY) <= yTolerance) {
+          lineMap.get(keyY)!.push(item);
+          placed = true;
+          break;
         }
-      };
-      reader.onerror = () => reject(new Error('Failed to read file'));
-      reader.readAsArrayBuffer(file);
+      }
+      if (!placed) lineMap.set(y, [item]);
+    }
+
+    const lines: TextLine[] = [];
+    for (const [, lineItems] of lineMap) {
+      lineItems.sort((a, b) => a.transform[4] - b.transform[4]);
+      const text = lineItems.map((it) => it.str).join(' ').replace(/\s+/g, ' ').trim();
+      if (!text) continue;
+
+      const x = lineItems[0].transform[4];
+      const lastItem = lineItems[lineItems.length - 1];
+      const width = lastItem.transform[4] + lastItem.width - x;
+      const y = lineItems[0].transform[5];
+      const height = Math.max(...lineItems.map((it) => it.height || Math.abs(it.transform[3])));
+
+      lines.push({ x, y, width, height, text, translatedText: '' });
+    }
+
+    lines.sort((a, b) => b.y - a.y);
+
+    const pageText = lines.map((l) => l.text).join('\n');
+
+    pages.push({
+      pageNumber: i,
+      width: viewport.width,
+      height: viewport.height,
+      imageDataUrl,
+      lines,
+      text: pageText,
     });
-  }, [pdfjsLib]);
 
-  const translateText = useCallback(async (text: string, sourceLang: string, targetLang: string) => {
-    try {
-      // Split text into chunks (MyMemory has a limit of ~5000 chars)
-      const maxChunkSize = 4000;
-      const chunks = [];
-      let currentChunk = '';
-      
-      // Split by sentences to avoid breaking meaning
-      const sentences = text.match(/[^.!?]+[.!?]+/g) || [text];
-      
-      for (const sentence of sentences) {
-        if (currentChunk.length + sentence.length > maxChunkSize && currentChunk.length > 0) {
-          chunks.push(currentChunk.trim());
-          currentChunk = '';
-        }
-        currentChunk += sentence;
-      }
-      if (currentChunk.trim()) chunks.push(currentChunk.trim());
-      
-      let translatedText = '';
-      
-      for (const chunk of chunks) {
-        const langPair = sourceLang === 'auto' ? targetLang : `${sourceLang}|${targetLang}`;
-        const response = await fetch(`https://api.mymemory.translated.net/get?q=${encodeURIComponent(chunk)}&langpair=${langPair}`);
-        const data = await response.json();
-        
-        if (data.responseStatus === 200) {
-          translatedText += data.responseData.translatedText + ' ';
-        } else {
-          throw new Error(data.responseDetails || 'Translation failed');
-        }
-        
-        // Add a small delay between requests to avoid rate limiting
-        if (chunks.length > 1) {
-          await new Promise(resolve => setTimeout(resolve, 500));
-        }
-      }
-      
-      return translatedText.trim();
-    } catch (error: any) {
-      console.error('Translate error:', error);
-      throw new Error(error.message || 'Translation service unavailable');
+    onProgress?.(i, pdf.numPages);
+  }
+
+  await pdf.cleanup();
+
+  return { numPages: pdf.numPages, pages };
+}
+
+  async function translateBatch(
+  texts: string[],
+  source: string,
+  target: string,
+  onProgress?: (completed: number, total: number) => void,
+  signal?: AbortSignal
+): Promise<string[]> {
+  const results: string[] = new Array(texts.length);
+  const total = texts.length;
+  let completed = 0;
+  const BATCH = 6;
+
+  for (let i = 0; i < total; i += BATCH) {
+    if (signal?.aborted) throw new DOMException('Aborted', 'AbortError');
+
+    const slice = texts.slice(i, i + BATCH);
+    const settled = await Promise.allSettled(
+      slice.map((t) => translateText(t, source, target))
+    );
+
+    settled.forEach((res, j) => {
+      const idx = i + j;
+      results[idx] = res.status === 'fulfilled' ? res.value?.translatedText : texts[idx];
+      completed += 1;
+      onProgress?.(completed, total);
+    });
+  }
+  return results;
+}
+
+
+async function translateText(
+  text: string,
+  source: string,
+  target: string
+): Promise<{ translatedText: string; detectedSource?: string }> {
+  try {
+    if (!text || !target) {
+      throw new Error("Missing required fields: q, target");
     }
-  }, []);
 
-  const handleTranslate = async () => {
-    if (!file) return;
-    
-    setStatus('processing');
-    setErrorMessage(null);
+    // Use Google Translate's free unofficial endpoint.
+    // We split into batches to stay within URL length limits.
+    const params = new URLSearchParams();
+    params.set("client", "gtx");
+    params.set("sl", source || "auto");
+    params.set("tl", target);
+    params.set("dt", "t");
+    params.set("q", text);
 
-    try {
-      const extractedText = await extractTextFromPDF(file);
-      const translated = await translateText(extractedText, sourceLang, targetLang);
-      setTranslatedText(translated);
-      setStatus('success');
-    } catch (err: any) {
-      console.error('Translate error:', err);
-      setErrorMessage(err.message);
-      setStatus('error');
+    const url = `https://translate.googleapis.com/translate_a/single?${params.toString()}`;
+
+    const resp = await fetch(url, {
+      headers: { "User-Agent": "Mozilla/5.0" },
+    });
+
+    if (!resp.ok) {
+      throw new Error(`Translation service error (${resp.status})`);
     }
-  };
 
-  const downloadAsText = () => {
-    const blob = new Blob([translatedText], { type: 'text/plain' });
-    const url = window.URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = 'translated.txt';
-    a.click();
-    window.URL.revokeObjectURL(url);
-  };
+    const data = await resp.json();
+    console.log("data : ", data);
+    // data[0] is an array of [translatedChunk, originalChunk, ...] pairs
+    let translatedText = "";
+    if (Array.isArray(data) && Array.isArray(data[0])) {
+      for (const chunk of data[0]) {
+        if (Array.isArray(chunk) && typeof chunk[0] === "string") {
+          translatedText += chunk[0];
+        }
+      }
+    }
 
-  const reset = () => {
+    if (!translatedText) {
+      throw new Error("Translation response was empty");
+    }
+
+    // detected source language (if auto)
+    let detectedSource: string | undefined;
+    if (Array.isArray(data) && data[2]) {
+      detectedSource = data[2] as string;
+    }
+    console.log('TranslatedText : ', translatedText);
+
+    return { translatedText, detectedSource };
+  } catch (err) {
+    const message = err instanceof Error ? err.message : "Unknown error";
+    throw new Error(message);
+  }
+}
+
+const downloadAsText = () => {
+  let content = "";
+  const fileName = `${file?.name.replace(/\.pdf$/i, "")}_${targetLang}.txt`
+  pages.forEach((page, pageIndex) => {
+    content += `========== Page ${pageIndex + 1} ==========\n\n`;
+
+    page.lines.forEach((line) => {
+      if (line.translatedText) {
+        content += line.translatedText + "\n";
+      }
+    });
+
+    content += "\n";
+  });
+
+  const blob = new Blob([content], {
+    type: "text/plain;charset=utf-8",
+  });
+
+  const url = URL.createObjectURL(blob);
+
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = fileName;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+
+  URL.revokeObjectURL(url);
+}
+
+    const reset = () => {
+    abortRef.current?.abort();
     setFile(null);
-    setSourceLang('auto');
-    setTargetLang('en');
-    setStatus('idle');
-    setTranslatedText('');
-    setErrorMessage(null);
-    setNumPages(0);
+    setStage('idle');
+    setError(null);
+    setPages([]);
+    setCurrentPage(0);
+    setTotalPages(0);
+    setCompletedPara(0);
+    setTotalPara(0);
   };
+
+  const canTranslate = file && targetLang && stage !== 'extracting' && stage !== 'translating';
 
   return (
     <>
@@ -214,7 +437,47 @@ export default function TranslatePage() {
                 <p className="text-sm font-bold text-gray-700 mb-2">File: {file?.name}</p>
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+                <div className="mt-6">
+                <div className="mb-3 flex items-center gap-2">
+                  <span className="text-xs font-semibold uppercase tracking-wide text-slate-500">
+                    Translation
+                  </span>
+                  <div className="h-px flex-1 bg-slate-100" />
+                </div>
+                <div className="flex flex-col gap-3 sm:flex-row sm:items-end">
+                  <LanguageSelect
+                    label="From"
+                    value={sourceLang}
+                    onChange={setSourceLang}
+                    id="source-lang"
+                    allowAuto
+                  />
+                  <div className="flex shrink-0 items-center justify-center pb-3 sm:pb-3.5">
+                    <ArrowRight className="h-5 w-5 text-slate-300 rotate-90 sm:rotate-0" />
+                  </div>
+                  <LanguageSelect
+                    label="To"
+                    value={targetLang}
+                    onChange={setTargetLang}
+                    id="target-lang"
+                  />
+                </div>
+                <p className="mt-2 text-xs text-slate-400">
+                  Leave &quot;From&quot; as Auto-detect to let the translator detect the source language.
+                </p>
+              </div>
+
+              {error && (
+                <div className="mt-5 flex items-start gap-2.5 rounded-xl border border-red-200 bg-red-50 p-3.5 text-sm text-red-700 animate-fade-in-fast">
+                  <AlertCircle className="mt-0.5 h-4 w-4 shrink-0" />
+                  <div>
+                    <p className="font-medium">Translation failed</p>
+                    <p className="mt-0.5 text-red-600">{error}</p>
+                  </div>
+                </div>
+              )}
+
+              {/* <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
                 <div>
                   <label className="block text-sm font-bold text-gray-700 mb-2">Source Language</label>
                   <select 
@@ -240,11 +503,12 @@ export default function TranslatePage() {
                     ))}
                   </select>
                 </div>
-              </div>
+              </div> */}
 
               <div className="flex gap-3">
                 <button 
                   onClick={handleTranslate}
+                  disabled={!canTranslate}
                   className="bg-primary text-white px-6 py-3 rounded-xl font-bold flex items-center justify-center gap-2 shadow-xl shadow-primary/20 hover:scale-105 transition-all"
                 >
                   Translate
@@ -276,12 +540,13 @@ export default function TranslatePage() {
                 <ShieldCheck className="w-10 h-10 text-primary" />
               </div>
               <h2 className="text-4xl font-extrabold mb-4 text-center">Translation Complete!</h2>
-              <div className="bg-gray-50 rounded-xl p-6 mb-8 max-h-100 overflow-y-auto">
-                <pre className="text-sm whitespace-pre-wrap">{translatedText}</pre>
-              </div>
-              <div className="flex flex-col items-center gap-4">
+              {/* <div className="bg-gray-50 rounded-xl p-6 mb-8 max-h-100 overflow-y-auto">
+                <pre className="text-sm text-black whitespace-pre-wrap">{translatedText}</pre>
+              </div> */}
+              <div className="flex mt-2 flex-col items-center gap-4">
                 <button 
                   onClick={downloadAsText}
+                  disabled={downloading}
                   className="bg-primary text-white px-10 py-4 rounded-xl font-bold flex items-center gap-3 shadow-xl shadow-primary/20 hover:scale-105 transition-all"
                 >
                   <Download className="w-5 h-5" /> Download as TXT
