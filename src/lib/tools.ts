@@ -152,54 +152,6 @@ export const tools: Tool[] = [
       metaDescription: "Select and remove specific pages from your PDF."
     }
   },
-  {
-    title: "Extract pages",
-    description: "Extract specific pages from your PDF.",
-    shortDescription: "Extract specific pages from your PDF.",
-    slug: "extract-pages",
-    icon: FileMinus2,
-    iconColor: "text-orange-500",
-    bgColor: "bg-orange-50",
-    href: "/extract-pages",
-    tags: ["extract", "pages"],
-    category: ["ORGANIZE PDF", "pdf-manipulation", "pdf-pages"],
-    seo: {
-      metaTitle: "Extract Pages from PDF",
-      metaDescription: "Extract specific pages from your PDF."
-    }
-  },
-  {
-    title: "Organize PDF",
-    description: "Reorder pages in your PDF.",
-    shortDescription: "Reorder pages in your PDF.",
-    slug: "organize-pdf",
-    icon: Layers,
-    iconColor: "text-blue-500",
-    bgColor: "bg-blue-50",
-    href: "/organize-pdf",
-    tags: ["organize", "reorder", "pages"],
-    category: ["ORGANIZE PDF", "pdf-manipulation"],
-    seo: {
-      metaTitle: "Organize PDF - Reorder Pages",
-      metaDescription: "Reorder pages in your PDF."
-    }
-  },
-  {
-    title: "Scan to PDF",
-    description: "Scan documents and convert to PDF.",
-    shortDescription: "Scan documents and convert to PDF.",
-    slug: "scan-to-pdf",
-    icon: ScanFace,
-    iconColor: "text-purple-500",
-    bgColor: "bg-purple-50",
-    href: "/scan-to-pdf",
-    tags: ["scan", "pdf"],
-    category: ["ORGANIZE PDF"],
-    seo: {
-      metaTitle: "Scan to PDF",
-      metaDescription: "Scan documents and convert to PDF."
-    }
-  },
 
   // OPTIMIZE PDF
   {
@@ -226,28 +178,12 @@ export const tools: Tool[] = [
     icon: Wrench,
     iconColor: "text-yellow-600",
     bgColor: "bg-yellow-50",
-    href: "/repair",
+    href: "/repair-pdf",
     tags: ["repair", "fix", "corrupt"],
     category: ["OPTIMIZE PDF"],
     seo: {
       metaTitle: "Repair PDF - Fix Corrupted Files",
       metaDescription: "Repair damaged or corrupted PDF files."
-    }
-  },
-  {
-    title: "OCR PDF",
-    description: "Make scanned PDFs searchable and editable with OCR.",
-    shortDescription: "Make scanned PDFs searchable and editable with OCR.",
-    slug: "ocr-pdf",
-    icon: Search,
-    iconColor: "text-green-600",
-    bgColor: "bg-green-50",
-    href: "/ocr-pdf",
-    tags: ["ocr", "searchable", "scan"],
-    category: ["OPTIMIZE PDF"],
-    seo: {
-      metaTitle: "OCR PDF - Make PDFs Searchable",
-      metaDescription: "Make scanned PDFs searchable and editable with OCR."
     }
   },
 
@@ -383,22 +319,6 @@ export const tools: Tool[] = [
     }
   },
   {
-    title: "PDF to Excel",
-    description: "Convert PDF documents to editable Excel spreadsheets.",
-    shortDescription: "Convert PDF documents to editable Excel spreadsheets.",
-    slug: "pdf-to-excel",
-    icon: FileSpreadsheet,
-    iconColor: "text-green-500",
-    bgColor: "bg-green-50",
-    href: "/convert/pdf-to-excel",
-    tags: ["xls", "xlsx", "convert"],
-    category: ["CONVERT FROM PDF", "pdf-convert", "office-convert"],
-    seo: {
-      metaTitle: "PDF to Excel - Convert to Spreadsheets",
-      metaDescription: "Convert PDF documents to editable Excel spreadsheets."
-    }
-  },
-  {
     title: "PDF to PDF/A",
     description: "Convert PDF documents to PDF/A for long-term archiving.",
     shortDescription: "Convert PDF documents to PDF/A for long-term archiving.",
@@ -488,28 +408,12 @@ export const tools: Tool[] = [
     icon: FileEdit,
     iconColor: "text-red-400",
     bgColor: "bg-red-50",
-    href: "/edit",
+    href: "/pdf-editor",
     tags: ["write", "modify", "annotate"],
     category: ["EDIT PDF", "pdf-edit"],
     seo: {
       metaTitle: "Edit PDF - Add Text & Comments",
       metaDescription: "Add text, shapes, comments and highlights with ease."
-    }
-  },
-  {
-    title: "PDF Forms",
-    description: "Create and edit PDF forms.",
-    shortDescription: "Create and edit PDF forms.",
-    slug: "pdf-forms",
-    icon: FileEdit,
-    iconColor: "text-red-500",
-    bgColor: "bg-red-50",
-    href: "/pdf-forms",
-    tags: ["forms", "edit"],
-    category: ["EDIT PDF"],
-    seo: {
-      metaTitle: "PDF Forms - Create & Edit",
-      metaDescription: "Create and edit PDF forms."
     }
   },
 
@@ -538,7 +442,7 @@ export const tools: Tool[] = [
     icon: Shield,
     iconColor: "text-blue-500",
     bgColor: "bg-blue-50",
-    href: "/protect",
+    href: "/protect-pdf",
     tags: ["password", "security", "protect"],
     category: ["PDF SECURITY"],
     seo: {
@@ -546,38 +450,7 @@ export const tools: Tool[] = [
       metaDescription: "Add password protection to your PDF files."
     }
   },
-  {
-    title: "Sign PDF",
-    description: "Sign your PDF documents electronically.",
-    shortDescription: "Sign your PDF documents electronically.",
-    slug: "sign",
-    icon: KeySquare,
-    iconColor: "text-blue-500",
-    bgColor: "bg-blue-50",
-    href: "/sign",
-    tags: ["sign", "signature", "electronic"],
-    category: ["PDF SECURITY"],
-    seo: {
-      metaTitle: "Sign PDF - Electronic Signatures",
-      metaDescription: "Sign your PDF documents electronically."
-    }
-  },
-  {
-    title: "Redact PDF",
-    description: "Redact sensitive information from your PDF files.",
-    shortDescription: "Redact sensitive information from your PDF files.",
-    slug: "redact",
-    icon: ShieldAlert,
-    iconColor: "text-red-600",
-    bgColor: "bg-red-50",
-    href: "/redact",
-    tags: ["redact", "sensitive", "information"],
-    category: ["PDF SECURITY"],
-    seo: {
-      metaTitle: "Redact PDF - Remove Sensitive Info",
-      metaDescription: "Redact sensitive information from your PDF files."
-    }
-  },
+
   {
     title: "Compare PDF",
     description: "Compare two PDF files to find differences.",
@@ -612,22 +485,6 @@ export const tools: Tool[] = [
       metaDescription: "Translate PDF text to another language, including Indian languages."
     }
   },
-  {
-    title: "AI Summarizer",
-    description: "Summarize your PDF using AI.",
-    shortDescription: "Summarize your PDF using AI.",
-    slug: "ai-summarizer",
-    icon: Languages,
-    iconColor: "text-violet-600",
-    bgColor: "bg-violet-50",
-    href: "/ai-summarizer",
-    tags: ["ai", "summarize", "summary"],
-    category: ["PDF INTELLIGENCE"],
-    seo: {
-      metaTitle: "AI Summarizer - Summarize PDFs",
-      metaDescription: "Summarize your PDF using AI."
-    }
-  }
 ];
 
 export function getRelevantTools(currentToolHref: string, count: number = 4): Tool[] {

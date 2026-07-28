@@ -18,7 +18,8 @@ import {
   ArrowRight,
   Wrench,
   Trash2,
-  Languages
+  Languages,
+  Text
 } from "lucide-react";
 
 import Link from "next/link";
@@ -152,13 +153,13 @@ const staticTools = [
     tags: ["ppt", "pptx", "convert"]
   },
   {
-    title: "PDF to Excel",
-    description: "Convert PDF documents to editable Excel spreadsheets.",
-    icon: FileSpreadsheet,
-    iconColor: "text-green-500",
-    bgColor: "bg-green-50",
-    href: "/convert/pdf-to-excel",
-    tags: ["xls", "xlsx", "convert"]
+    title: "PDF to TXT",
+    description: "Convert PDF documents to editable TXT file",
+    icon: Text,
+    iconColor: "text-gray-500",
+    bgColor: "bg-gray-50",
+    href: "/convert/pdf-to-txt",
+    tags: ["TXT", "TXT", "convert"]
   },
   {
     title: "PDF to PDF/A",

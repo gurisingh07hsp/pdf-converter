@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { Globe, Share2 } from "lucide-react";
+import Image from "next/image";
 
 export default function Footer() {
   return (
@@ -7,11 +8,10 @@ export default function Footer() {
       <div className="max-w-6xl mx-auto flex flex-col md:flex-row justify-between items-start md:items-center gap-8">
         <div className="flex flex-col gap-4">
           <Link href="/" className="flex items-center text-xl font-bold">
-            <span className="text-primary">PDF</span>
-            <span className="text-foreground">Swift</span>
+            <Image src={'/logo.png'} alt="logo" width={130} height={50} />
           </Link>
           <p className="text-sm text-gray-400">
-            © 2024 PDFSwift. All rights reserved.
+            © 2026 PDFSwift. All rights reserved.
           </p>
         </div>
 

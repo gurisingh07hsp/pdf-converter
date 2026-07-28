@@ -365,35 +365,113 @@ async function translateText(
   }
 }
 
-const downloadAsText = () => {
-  let content = "";
-  const fileName = `${file?.name.replace(/\.pdf$/i, "")}_${targetLang}.txt`
-  pages.forEach((page, pageIndex) => {
-    content += `========== Page ${pageIndex + 1} ==========\n\n`;
+const downloadAsText = async() => {
+  // let content = "";
+  // const fileName = `${file?.name.replace(/\.pdf$/i, "")}_${targetLang}.txt`
+  // pages.forEach((page, pageIndex) => {
+  //   content += `========== Page ${pageIndex + 1} ==========\n\n`;
 
-    page.lines.forEach((line) => {
-      if (line.translatedText) {
-        content += line.translatedText + "\n";
-      }
-    });
+  //   page.lines.forEach((line) => {
+  //     if (line.translatedText) {
+  //       content += line.translatedText + "\n";
+  //     }
+  //   });
 
-    content += "\n";
-  });
+  //   content += "\n";
+  // });
 
-  const blob = new Blob([content], {
-    type: "text/plain;charset=utf-8",
-  });
+  // const blob = new Blob([content], {
+  //   type: "text/plain;charset=utf-8",
+  // });
 
+  // const url = URL.createObjectURL(blob);
+
+  // const a = document.createElement("a");
+  // a.href = url;
+  // a.download = fileName;
+  // document.body.appendChild(a);
+  // a.click();
+  // document.body.removeChild(a);
+
+  // URL.revokeObjectURL(url);
+    const fileName = file?.name || 'file';
+    setDownloading(true);
+    try {
+      const blob = await generateTranslatedPdf(pages, fileName);
+      downloadBlob(blob, `${fileName.replace(/\.pdf$/i, '')}_${targetLang}.pdf`);
+    } catch (err) {
+      const message = err instanceof Error ? err.message : 'Download failed';
+      alert(message);
+    } finally {
+      setDownloading(false);
+    }
+
+}
+
+async function generateTranslatedPdf(
+  pages: PdfPage[],
+  fileName: string
+): Promise<Blob> {
+  if (pages.length === 0) throw new Error('No pages to export');
+
+  const first = pages[0];
+  const orientation = first.width >= first.height ? 'landscape' : 'portrait';
+  const pdf = new jsPDF({ orientation, unit: 'pt', format: [first.width, first.height] });
+
+  for (let i = 0; i < pages.length; i++) {
+    const page = pages[i];
+
+    if (i > 0) {
+      const pageOrientation = page.width >= page.height ? 'landscape' : 'portrait';
+      pdf.addPage([page.width, page.height], pageOrientation);
+    }
+
+    // White background
+    pdf.setFillColor(255, 255, 255);
+    pdf.rect(0, 0, page.width, page.height, 'F');
+
+    pdf.setTextColor(20, 20, 20);
+    pdf.setFont('helvetica', 'normal');
+
+    for (const line of page.lines) {
+      if (!line.translatedText) continue;
+
+      const fontSize = Math.max(7, line.height * 0.75);
+      pdf.setFontSize(fontSize);
+
+      // Allow text to wrap up to 1.6x the original line width so longer
+      // translations don't overflow the page, while staying near the original
+      // position.
+      const maxWrapWidth = Math.min(
+        line.width * 1.6,
+        page.width - line.x - 12
+      );
+      const wrapWidth = Math.max(40, maxWrapWidth);
+
+      const wrapped = pdf.splitTextToSize(line.translatedText, wrapWidth);
+      const lineHeight = fontSize * 1.2;
+      // PDF origin is bottom-left; pdfjs y is also bottom-left baseline
+      const textStartY = page.height - line.y + fontSize * 0.25;
+
+      wrapped.forEach((ln: string, idx: number) => {
+        pdf.text(ln, line.x, textStartY + idx * lineHeight);
+      });
+    }
+  }
+
+  return pdf.output('blob');
+}
+
+function downloadBlob(blob: Blob, fileName: string) {
   const url = URL.createObjectURL(blob);
-
-  const a = document.createElement("a");
+  const a = document.createElement('a');
   a.href = url;
   a.download = fileName;
   document.body.appendChild(a);
   a.click();
   document.body.removeChild(a);
-
-  URL.revokeObjectURL(url);
+  // Defer revoke so the download has time to start in all browsers
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
 }
 
     const reset = () => {
@@ -549,7 +627,7 @@ const downloadAsText = () => {
                   disabled={downloading}
                   className="bg-primary text-white px-10 py-4 rounded-xl font-bold flex items-center gap-3 shadow-xl shadow-primary/20 hover:scale-105 transition-all"
                 >
-                  <Download className="w-5 h-5" /> Download as TXT
+                  <Download className="w-5 h-5" /> Download
                 </button>
                 <button 
                   onClick={reset}

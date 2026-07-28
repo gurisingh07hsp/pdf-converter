@@ -14,7 +14,7 @@ const jetBrainsMono = JetBrains_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "PDFSwift - Precision PDF Tools",
+  title: "PDFTouch - Precision PDF Tools",
   description: "Compress, convert, merge, and edit your documents with industrial-grade reliability.",
 };
 

@@ -470,6 +470,7 @@ import {
   Settings,
   File,
 } from "lucide-react";
+import Image from "next/image";
 
 // Grouped to mirror the 5-column mega menu layout:
 // Merge & Edit | Optimize & Extract | Convert To PDF | Convert From PDF | PDF Security
@@ -551,8 +552,7 @@ export default function Navbar() {
     <>
       <nav className="flex items-center justify-between px-4 md:px-8 py-4 border-b border-border-custom bg-white sticky top-0 z-50">
         <Link href="/" className="flex items-center text-2xl font-bold leading-none">
-          <span className="text-primary">PDF</span>
-          <span className="text-foreground">Swift</span>
+          <Image src={'/logo.png'} alt="logo" width={130} height={50} />
         </Link>
 
         <div className="hidden relative md:flex items-center gap-8">
