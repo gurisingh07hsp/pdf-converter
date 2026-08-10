@@ -1,13 +1,18 @@
 import ToolLayout from '@/components/ToolLayout';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
-import { generateToolMetadata } from '@/lib/seo';
+import { Metadata } from 'next';
 
-export const generateMetadata = () => generateToolMetadata(
-  'jpg-to-pdf', 
-  'JPG to PDF', 
-  'Convert images to PDF documents in seconds.'
-);
+export const metadata: Metadata = {
+  alternates: {
+    canonical: "/convert/jpg-to-pdf",
+  },
+}
+// export const generateMetadata = () => generateToolMetadata(
+//   'jpg-to-pdf', 
+//   'JPG to PDF', 
+//   'Convert images to PDF documents in seconds.'
+// );
 
 export default function JPGToPDF() {
   return (

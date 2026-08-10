@@ -1,13 +1,19 @@
 import ToolLayout from '@/components/ToolLayout';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
-import { generateToolMetadata } from '@/lib/seo';
+// import { generateToolMetadata } from '@/lib/seo';
+import { Metadata } from 'next';
 
-export const generateMetadata = () => generateToolMetadata(
-  'pdf-to-word', 
-  'PDF to Word', 
-  'Convert PDF to Word online for free. Turn PDF files into editable DOCX documents with our fast, secure, and accurate converter.'
-);
+export const metadata: Metadata = {
+  alternates: {
+    canonical: "/convert/pdf-to-word",
+  },
+}
+// export const generateMetadata = () => generateToolMetadata(
+//   'pdf-to-word', 
+//   'PDF to Word', 
+//   'Convert PDF to Word online for free. Turn PDF files into editable DOCX documents with our fast, secure, and accurate converter.'
+// );
 
 export default function PDFToWord() {
   return (

@@ -1,13 +1,19 @@
 import ToolLayout from '@/components/ToolLayout';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
-import { generateToolMetadata } from '@/lib/seo';
+// import { generateToolMetadata } from '@/lib/seo';
+import { Metadata } from 'next';
 
-export const generateMetadata = () => generateToolMetadata(
-  'word-to-pdf', 
-  'Word to PDF', 
-  'Make DOC and DOCX files easy to read by converting them to PDF.'
-);
+export const metadata: Metadata = {
+  alternates: {
+    canonical: "/convert/word-to-pdf",
+  },
+}
+// export const generateMetadata = () => generateToolMetadata(
+//   'word-to-pdf', 
+//   'Word to PDF', 
+//   'Make DOC and DOCX files easy to read by converting them to PDF.'
+// );
 
 export default function WordToPDF() {
   return (

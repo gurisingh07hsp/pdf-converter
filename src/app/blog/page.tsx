@@ -1,7 +1,12 @@
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { ArrowRight, ExternalLink } from "lucide-react";
-import Link from "next/link";
+import { Metadata } from 'next';
+export const metadata: Metadata = {
+  alternates: {
+    canonical: "/",
+  },
+}
 
 const categories = ["All Articles", "Guides", "Productivity", "Security", "Updates"];
 
@@ -54,7 +59,7 @@ export default function BlogPage() {
   return (
     <div className="flex flex-col min-h-screen">
       <Navbar />
-      <main className="flex-grow">
+      <main className="grow">
         {/* Header */}
         <section className="px-8 pt-20 pb-12 bg-white">
           <div className="max-w-6xl mx-auto">
@@ -68,8 +73,8 @@ export default function BlogPage() {
         {/* Featured Post */}
         <section className="px-8 py-12 bg-white">
           <div className="max-w-6xl mx-auto">
-            <div className="bg-white border border-border-custom rounded-[2rem] overflow-hidden flex flex-col lg:flex-row shadow-sm hover:shadow-xl transition-all group cursor-pointer">
-              <div className="lg:w-1/2 aspect-[16/10] bg-gray-100 relative">
+            <div className="bg-white border border-border-custom rounded-4xl overflow-hidden flex flex-col lg:flex-row shadow-sm hover:shadow-xl transition-all group cursor-pointer">
+              <div className="lg:w-1/2 aspect-16/10 bg-gray-100 relative">
                 <div className="absolute top-6 left-6 bg-primary text-white text-[10px] font-bold px-3 py-1 rounded-full uppercase tracking-widest z-10">Featured</div>
                 <div className="absolute inset-0 flex items-center justify-center">
                   <span className="text-gray-300 font-bold text-2xl italic">Guide Preview</span>
@@ -116,7 +121,7 @@ export default function BlogPage() {
           <div className="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10">
             {posts.map((post, i) => (
               <div key={i} className="group cursor-pointer">
-                <div className="aspect-[16/10] bg-gray-100 rounded-2xl mb-8 overflow-hidden relative">
+                <div className="aspect-16/10 bg-gray-100 rounded-2xl mb-8 overflow-hidden relative">
                    <div className="absolute inset-0 flex items-center justify-center">
                       <span className="text-gray-200 font-bold italic">Image Preview</span>
                    </div>
@@ -147,7 +152,7 @@ export default function BlogPage() {
 
         {/* Newsletter CTA */}
         <section className="px-8 py-20 bg-white">
-          <div className="max-w-6xl mx-auto bg-primary rounded-[2.5rem] p-16 text-white flex flex-col lg:flex-row items-center justify-between gap-12 relative overflow-hidden">
+          <div className="max-w-6xl mx-auto bg-primary rounded-4xl p-16 text-white flex flex-col lg:flex-row items-center justify-between gap-12 relative overflow-hidden">
             <div className="absolute right-0 bottom-0 w-1/3 h-full bg-white/5 skew-x-12 translate-x-1/2 pointer-events-none" />
             <div className="lg:w-1/2">
               <h2 className="text-3xl font-bold mb-4">Master Your Document Workflow</h2>
@@ -158,7 +163,7 @@ export default function BlogPage() {
                 <input 
                   type="email" 
                   placeholder="Enter your email address" 
-                  className="flex-grow bg-white/10 border border-white/20 rounded-lg px-6 py-4 placeholder:text-white/50 focus:outline-none focus:bg-white/20 transition-all"
+                  className="grow bg-white/10 border border-white/20 rounded-lg px-6 py-4 placeholder:text-white/50 focus:outline-none focus:bg-white/20 transition-all"
                 />
                 <button className="bg-white text-primary px-8 py-4 rounded-lg font-bold hover:shadow-xl transition-all">Subscribe</button>
               </form>

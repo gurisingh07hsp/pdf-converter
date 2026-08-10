@@ -1,14 +1,20 @@
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { ShieldCheck, Zap, Cloud, X } from "lucide-react";
+import { Metadata } from 'next';
 
+export const metadata: Metadata = {
+  alternates: {
+    canonical: "/processing",
+  },
+}
 export default function ProcessingPage() {
   return (
     <div className="flex flex-col min-h-screen">
       <Navbar />
-      <main className="flex-grow flex items-center justify-center py-20 bg-surface">
+      <main className="grow flex items-center justify-center py-20 bg-surface">
         <div className="max-w-4xl w-full px-8">
-          <div className="bg-white rounded-[2rem] shadow-xl shadow-gray-200/50 p-16 text-center relative overflow-hidden">
+          <div className="bg-white rounded-4xl shadow-xl shadow-gray-200/50 p-16 text-center relative overflow-hidden">
             {/* Header */}
             <div className="flex items-center justify-center gap-2 mb-4">
               <span className="w-2 h-2 bg-red-500 rounded-full animate-pulse" />
@@ -25,7 +31,7 @@ export default function ProcessingPage() {
                  <div className="w-40 h-52 bg-white rounded-lg shadow-lg p-6 flex flex-col gap-4">
                     <div className="w-full h-4 bg-gray-50 rounded" />
                     <div className="w-3/4 h-4 bg-gray-50 rounded" />
-                    <div className="flex-grow flex items-center justify-center">
+                    <div className="grow flex items-center justify-center">
                        <div className="w-12 h-12 rounded-full border-4 border-primary/20 border-t-primary animate-spin" />
                     </div>
                     <div className="w-full h-4 bg-gray-50 rounded" />

@@ -3,6 +3,14 @@ import Footer from "@/components/Footer";
 import { Shield, Clock, EyeOff, ArrowRight, Play } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
+import { Metadata } from 'next';
+
+export const metadata: Metadata = {
+  title: 'About Us - PDFTouch',
+  alternates: {
+    canonical: "/",
+  },
+}
 
 const team = [
   {
@@ -35,7 +43,7 @@ export default function AboutPage() {
   return (
     <div className="flex flex-col min-h-screen">
       <Navbar />
-      <main className="flex-grow">
+      <main className="grow">
         {/* Hero Section */}
         <section className="px-8 py-20 bg-white">
           <div className="max-w-6xl mx-auto">
@@ -58,8 +66,8 @@ export default function AboutPage() {
         {/* Our Story */}
         <section className="px-8 py-24 bg-surface">
           <div className="max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-20 items-center">
-            <div className="aspect-[4/3] bg-gray-200 rounded-3xl overflow-hidden relative shadow-2xl">
-               <div className="absolute inset-0 flex items-center justify-center bg-gradient-to-br from-gray-100 to-gray-300">
+            <div className="aspect-4/3 bg-gray-200 rounded-3xl overflow-hidden relative shadow-2xl">
+               <div className="absolute inset-0 flex items-center justify-center bg-linear-to-br from-gray-100 to-gray-300">
                   <span className="text-gray-400 font-bold">Office Preview</span>
                </div>
             </div>
@@ -133,7 +141,7 @@ export default function AboutPage() {
               {team.map((member, i) => (
                 <div key={i} className="group">
                   <div className="aspect-square bg-gray-200 rounded-2xl mb-6 overflow-hidden relative">
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent" />
+                    <div className="absolute inset-0 bg-linear-to-t from-black/20 to-transparent" />
                   </div>
                   <h3 className="text-lg font-bold">{member.name}</h3>
                   <p className="text-xs font-bold text-primary mb-4 uppercase tracking-widest">{member.role}</p>
@@ -146,8 +154,8 @@ export default function AboutPage() {
 
         {/* CTA */}
         <section className="px-8 py-24 bg-white">
-          <div className="max-w-4xl mx-auto bg-[#1a1a1a] rounded-[2rem] p-16 text-center text-white relative overflow-hidden">
-            <div className="absolute inset-0 bg-gradient-to-br from-white/5 to-transparent pointer-events-none" />
+          <div className="max-w-4xl mx-auto bg-[#1a1a1a] rounded-4xl p-16 text-center text-white relative overflow-hidden">
+            <div className="absolute inset-0 bg-linear-to-br from-white/5 to-transparent pointer-events-none" />
             <h2 className="text-3xl font-bold mb-4 relative z-10">Ready to work swifter?</h2>
             <p className="text-gray-400 mb-10 max-w-md mx-auto relative z-10">Join the millions of users who trust PDFSwift with their most important documents every day.</p>
             <div className="flex justify-center gap-4 relative z-10">

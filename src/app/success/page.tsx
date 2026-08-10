@@ -2,12 +2,18 @@ import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { CheckCircle2, Download, RotateCcw, ArrowRight, Zap, Combine, ChevronRight } from "lucide-react";
 import Link from "next/link";
+import { Metadata } from 'next';
 
+export const metadata: Metadata = {
+  alternates: {
+    canonical: "/success",
+  },
+}
 export default function SuccessPage() {
   return (
     <div className="flex flex-col min-h-screen">
       <Navbar />
-      <main className="flex-grow py-20 bg-white">
+      <main className="grow py-20 bg-white">
         <div className="max-w-4xl mx-auto px-8">
           {/* Success Header */}
           <div className="text-center mb-16">
@@ -90,7 +96,7 @@ export default function SuccessPage() {
 
               {/* Premium Promo */}
               <div className="bg-[#1a1a1a] rounded-2xl p-8 text-white relative overflow-hidden group cursor-pointer">
-                <div className="absolute inset-0 bg-gradient-to-br from-white/10 to-transparent" />
+                <div className="absolute inset-0 bg-linear-to-br from-white/10 to-transparent" />
                 <div className="relative z-10 flex flex-col h-full">
                   <h3 className="text-xl font-bold mb-2">Go Premium</h3>
                   <p className="text-sm text-gray-400 leading-relaxed mb-12">

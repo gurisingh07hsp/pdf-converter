@@ -1,12 +1,18 @@
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { Send, Clock, Mail, MessageCircle, HelpCircle, ArrowRight } from "lucide-react";
+import { Metadata } from 'next';
 
+export const metadata: Metadata = {
+  alternates: {
+    canonical: "/faq",
+  },
+}
 export default function FAQPage() {
   return (
     <div className="flex flex-col min-h-screen">
       <Navbar />
-      <main className="flex-grow">
+      <main className="grow">
         {/* Header */}
         <section className="px-8 pt-20 pb-12 bg-white">
           <div className="max-w-6xl mx-auto">
@@ -22,7 +28,7 @@ export default function FAQPage() {
         <section className="px-8 py-12 bg-white">
           <div className="max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-3 gap-12">
             {/* Form */}
-            <div className="lg:col-span-2 bg-white border border-border-custom rounded-[2rem] p-12 shadow-sm">
+            <div className="lg:col-span-2 bg-white border border-border-custom rounded-4xl p-12 shadow-sm">
               <h2 className="text-2xl font-bold mb-8">Send us a message</h2>
               <form className="space-y-8">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
@@ -60,7 +66,7 @@ export default function FAQPage() {
             {/* Sidebar */}
             <div className="space-y-8">
               {/* Hours */}
-              <div className="bg-surface border border-border-custom rounded-[2rem] p-10">
+              <div className="bg-surface border border-border-custom rounded-4xl p-10">
                 <div className="flex items-center gap-3 mb-8">
                   <Clock className="w-5 h-5 text-primary" />
                   <h3 className="font-bold">Support Hours</h3>
@@ -82,7 +88,7 @@ export default function FAQPage() {
               </div>
 
               {/* Direct Contact */}
-              <div className="bg-white border border-border-custom rounded-[2rem] p-10">
+              <div className="bg-white border border-border-custom rounded-4xl p-10">
                 <div className="flex items-center gap-3 mb-8">
                   <Mail className="w-5 h-5 text-primary" />
                   <h3 className="font-bold">Direct Contact</h3>
@@ -100,7 +106,7 @@ export default function FAQPage() {
               </div>
 
               {/* Self Service */}
-              <div className="bg-blue-600 rounded-[2rem] p-10 text-white relative overflow-hidden group cursor-pointer">
+              <div className="bg-blue-600 rounded-4xl p-10 text-white relative overflow-hidden group cursor-pointer">
                 <HelpCircle className="absolute -right-4 -bottom-4 w-32 h-32 text-white/10" />
                 <div className="flex items-center gap-3 mb-6">
                   <MessageCircle className="w-5 h-5" />
@@ -119,7 +125,7 @@ export default function FAQPage() {
 
         {/* Security Trust */}
         <section className="px-8 py-20 bg-white">
-          <div className="max-w-6xl mx-auto bg-surface border border-border-custom rounded-[2rem] p-12 flex flex-col md:flex-row items-center justify-between gap-8">
+          <div className="max-w-6xl mx-auto bg-surface border border-border-custom rounded-4xl p-12 flex flex-col md:flex-row items-center justify-between gap-8">
             <div className="max-w-md">
               <h2 className="text-2xl font-bold mb-4">Enterprise Grade Security</h2>
               <p className="text-sm text-gray-500">All messages and file attachments sent through our support system are encrypted in transit and at rest. Your privacy and data security are our top priorities.</p>

@@ -1,13 +1,19 @@
 import ToolLayout from '@/components/ToolLayout';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
-import { generateToolMetadata } from '@/lib/seo';
+// import { generateToolMetadata } from '@/lib/seo';
+import { Metadata } from 'next';
 
-export const generateMetadata = () => generateToolMetadata(
-  'txt-to-pdf', 
-  'TXT to PDF', 
-  'Make TXT files easy to read by converting them to PDF.'
-);
+export const metadata: Metadata = {
+  alternates: {
+    canonical: "/convert/txt-to-pdf",
+  },
+}
+// export const generateMetadata = () => generateToolMetadata(
+//   'txt-to-pdf', 
+//   'TXT to PDF', 
+//   'Make TXT files easy to read by converting them to PDF.'
+// );
 const TXT_TO_PDF = () => {
   return (
     <>

@@ -1,13 +1,19 @@
 import ToolLayout from '@/components/ToolLayout';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
-import { generateToolMetadata } from '@/lib/seo';
+// import { generateToolMetadata } from '@/lib/seo';
+import { Metadata } from 'next';
 
-export const generateMetadata = () => generateToolMetadata(
-  'merge', 
-  'Merge PDF', 
-  'Combine multiple PDFs into one document in seconds.'
-);
+export const metadata: Metadata = {
+  alternates: {
+    canonical: "/merge",
+  },
+}
+// export const generateMetadata = () => generateToolMetadata(
+//   'merge', 
+//   'Merge PDF', 
+//   'Combine multiple PDFs into one document in seconds.'
+// );
 
 export default function MergePage() {
   return (

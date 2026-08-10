@@ -1,7 +1,13 @@
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { Check, X } from "lucide-react";
+import { Metadata } from 'next';
 
+export const metadata: Metadata = {
+  alternates: {
+    canonical: "/pricing",
+  },
+}
 const plans = [
   {
     name: "Free",
@@ -63,7 +69,7 @@ export default function PricingPage() {
   return (
     <div className="flex flex-col min-h-screen">
       <Navbar />
-      <main className="flex-grow">
+      <main className="grow">
         {/* Header */}
         <section className="px-8 pt-24 pb-16 text-center bg-white">
           <div className="max-w-4xl mx-auto">
@@ -81,7 +87,7 @@ export default function PricingPage() {
             {plans.map((plan, i) => (
               <div 
                 key={i} 
-                className={`relative p-10 rounded-[2rem] border transition-all ${
+                className={`relative p-10 rounded-4xl border transition-all ${
                   plan.highlight 
                   ? "border-primary shadow-2xl shadow-primary/5 z-10 scale-105" 
                   : "border-border-custom bg-white"

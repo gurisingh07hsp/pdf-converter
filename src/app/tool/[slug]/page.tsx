@@ -17,6 +17,9 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
     title: tool.seo?.metaTitle || `${tool.slug} - PDFSwift`,
     description: tool.seo?.metaDescription || tool.shortDescription,
     keywords: tool.seo?.keywords,
+    alternates: {
+    canonical: "/tools/" + tool.slug,
+  },
   };
 }
 

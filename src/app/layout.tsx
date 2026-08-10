@@ -14,8 +14,12 @@ const jetBrainsMono = JetBrains_Mono({
 });
 
 export const metadata: Metadata = {
+  metadataBase: new URL("https://pdf-convert-pdf-convert-6tvplh-0f7e9e-153-75-235-24.sslip.io"),
   title: "PDFTouch - Precision PDF Tools",
   description: "Compress, convert, merge, and edit your documents with industrial-grade reliability.",
+  alternates: {
+    canonical: "/",
+  },
 };
 
 export default function RootLayout({
