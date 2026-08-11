@@ -85,22 +85,6 @@ export class PDFService {
             console.error('PDF merge failed:', error);
             throw new Error('Merge failed');
         }
-
-
-
-
-
-        // const qpdf = await this.getCmd('qpdf');
-        // const inputFiles = filePaths.map(f => `"${f}"`).join(' ');
-        // const command = `${qpdf} --empty --pages ${inputFiles} -- "${outputPath}"`;
-        
-        // try {
-        //     await execPromise(command);
-        //     return outputPath;
-        // } catch (error) {
-        //     console.error('QPDF merge failed:', error);
-        //     throw new Error('Merge failed. Ensure QPDF is installed.');
-        // }
     }
 
     /**

@@ -27,6 +27,7 @@ export default function ToolLayout({
 }: ToolLayoutProps) {
   const [status, setStatus] = useState<'idle' | 'processing' | 'success' | 'error'>('idle');
   const [downloadUrl, setDownloadUrl] = useState<string | null>(null);
+  const [downloadFilename, setDownloadFilename] = useState<string | null>(null);
   const [progress, setProgress] = useState(0);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const relevantTools: Tool[] = toolHref ? getRelevantTools(toolHref) : tools.slice(0, 4);
@@ -78,16 +79,51 @@ export default function ToolLayout({
       }
 
       const contentType = response.headers.get('content-type');
+
+
+
+      if (!contentType?.includes('application/json')) {
+  const blob = await response.blob();
+
+  const url = window.URL.createObjectURL(blob);
+
+  console.log("Blob URL:", url);
+
+  // Get filename from Content-Disposition
+  const contentDisposition = response.headers.get("content-disposition");
+
+  let filename = "download";
+
+  if (contentDisposition) {
+    const match = contentDisposition.match(
+      /filename\*?=(?:UTF-8'')?["']?([^;"']+)["']?/i
+    );
+
+    if (match?.[1]) {
+      filename = decodeURIComponent(match[1]);
+    }
+  }
+
+  filename = filename.split('_').pop() || '';
+
+  setDownloadUrl(url);
+
+  // If you have filename state
+  setDownloadFilename(filename);
+}
       
       // If it's not JSON, treat it as a binary file to download!
-      if (!contentType?.includes('application/json')) {
-        const blob = await response.blob();
-        const url = window.URL.createObjectURL(blob);
-        setDownloadUrl(url);
-      } else {
-        const data = await response.json();
-        setDownloadUrl(data.downloadUrl);
-      }
+      // if (!contentType?.includes('application/json')) {
+      //   const blob = await response.blob();
+      //   const url = window.URL.createObjectURL(blob);
+      //   console.log('url : ', url);
+      //   const finalUrl = url.split('_').pop() || 'result';
+      //   setDownloadUrl(finalUrl);
+      // } else {
+      //   const data = await response.json();
+      //   console.log('data : ', data);
+      //   setDownloadUrl(data.downloadUrl);
+      // }
       
       // Stop interval and set to 100%
       if (progressIntervalRef.current) {
@@ -157,7 +193,7 @@ export default function ToolLayout({
                 <a 
                   href={downloadUrl!} 
                   // Try to get filename from Content-Disposition or use default
-                  download="output"
+                  download={downloadFilename}
                   className="bg-primary text-white px-10 py-4 rounded-xl font-bold flex items-center gap-3 shadow-xl shadow-primary/20 hover:scale-105 transition-all"
                 >
                   <Download className="w-5 h-5" /> Download Result

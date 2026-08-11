@@ -11,6 +11,7 @@ export async function POST(req: NextRequest,{ params }: { params: Promise<{ tool
   const uploadDir = path.join(process.cwd(), "uploads"); 
   const inputPaths: string[] = [];
   let resultPath = "";
+  let originalName = '';
 
   try { 
     await mkdir(uploadDir, { recursive: true }); 
@@ -45,18 +46,22 @@ export async function POST(req: NextRequest,{ params }: { params: Promise<{ tool
     // Process using CLI-based PDFService
     switch (tool) {
       case 'merge':
+        console.log('running....');
+        originalName = path.basename(inputPaths[0],path.extname(inputPaths[0]));
+        console.log(originalName);
+        filename = `${originalName}-merged.pdf`;
+        console.log(filename);
+        resultPath = path.join(uploadDir, filename);
+        console.log('result Path : ', resultPath);
         await PDFService.mergePDFs(inputPaths, resultPath);
-        filename = path.basename(inputPaths[0], path.extname(inputPaths[0])) + ".pdf";
         break;
       
       case 'split':
+        originalName = path.basename(inputPaths[0],path.extname(inputPaths[0]));
+        filename = `${originalName}-splited.pdf`;
+        resultPath = path.join(uploadDir, filename);
         const splitPaths = await PDFService.splitPDF(inputPaths[0], uploadDir);
-        // For now, we return the first page as a single file, or you could zip them
-        // To keep it simple and working as a "binary response" pattern:
         if (splitPaths.length > 0) {
-          resultPath = splitPaths[0];
-          filename = "split_page_1.pdf";
-          // Cleanup other split pages if any
           splitPaths.slice(1).forEach(p => fs.unlinkSync(p));
         } else {
           throw new Error("Split failed to produce pages");
@@ -64,8 +69,10 @@ export async function POST(req: NextRequest,{ params }: { params: Promise<{ tool
         break;
 
       case 'compress':
+        originalName = path.basename(inputPaths[0],path.extname(inputPaths[0]));
+        filename = `${originalName}-splited.pdf`;
+        resultPath = path.join(uploadDir, filename);
         await PDFService.compressPDF(inputPaths[0], resultPath);
-        filename = path.basename(inputPaths[0], path.extname(inputPaths[0])) + ".pdf";
         break;
 
       case 'jpg-to-pdf':
