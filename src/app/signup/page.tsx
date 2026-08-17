@@ -5,6 +5,7 @@ import { useState } from "react";
 import { Eye, EyeOff, Mail, Lock, User, ArrowRight, ShieldCheck, CheckCircle2 } from "lucide-react";
 import axios from "axios";
 import { useRouter } from "next/navigation";
+import Image from "next/image";
 
 export default function SignupPage() {
   const [showPassword, setShowPassword] = useState(false);
@@ -43,8 +44,7 @@ export default function SignupPage() {
         <div className="absolute inset-0 bg-linear-to-br from-primary/20 to-transparent pointer-events-none" />
         <div className="max-w-md relative z-10">
           <Link href="/" className="flex items-center text-2xl font-bold mb-16">
-            <span className="text-primary">PDF</span>
-            <span className="text-white">Swift</span>
+            <Image src={'/logo.png'} alt="logo" width={130} height={50} />
           </Link>
 
           <h2 className="text-4xl font-extrabold mb-8 leading-tight">Join the next generation of PDF productivity.</h2>

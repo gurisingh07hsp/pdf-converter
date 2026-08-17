@@ -25,7 +25,10 @@ import {
   ScanFace,
   Search,
   Wrench,
-  Layers
+  Layers,
+  RotateCwIcon,
+  Image,
+  Text
 } from "lucide-react";
 
 export interface Tool {
@@ -134,6 +137,22 @@ export const tools: Tool[] = [
     seo: {
       metaTitle: "Split PDF - Extract Pages",
       metaDescription: "Separate one page or a whole set for easy management."
+    }
+  },
+  {
+    title: "Rotate PDF",
+    description: "Rotate pages in your PDF document.",
+    shortDescription: "Rotate pages in your PDF document.",
+    slug: "rotate-pdf",
+    icon: RotateCw,
+    iconColor: "text-purple-600",
+    bgColor: "bg-purple-50",
+    href: "/rotate-pdf",
+    tags: ["rotate", "pages"],
+    category: ["EDIT PDF", "pdf-edit"],
+    seo: {
+      metaTitle: "Rotate PDF - Rotate Pages",
+      metaDescription: "Rotate pages in your PDF document."
     }
   },
   {
@@ -268,6 +287,38 @@ export const tools: Tool[] = [
       metaDescription: "Convert web pages or HTML files to PDF documents."
     }
   },
+  {
+    title: "TIFF to PDF",
+    description: "Convert TIFF files to PDF documents.",
+    shortDescription: "Convert Tiff files to PDF documents.",
+    slug: "tiff-to-pdf",
+    icon: Image,
+    iconColor: "text-yellow-600",
+    bgColor: "bg-yellow-50",
+    href: "/convert/tiff-to-pdf",
+    tags: ["TIFF", "url", "convert"],
+    category: ["CONVERT TO PDF", "tiff-convert", "pdf-convert"],
+    seo: {
+      metaTitle: "Tiff to PDF - Convert Tiff files",
+      metaDescription: "Convert TIFF files to PDF documents."
+    }
+  },
+  {
+    title: "Txt to PDF",
+    description: "Convert txt files to PDF documents.",
+    shortDescription: "Convert txt files to PDF documents.",
+    slug: "txt-to-pdf",
+    icon: Image,
+    iconColor: "text-yellow-600",
+    bgColor: "bg-yellow-50",
+    href: "/convert/txt-to-pdf",
+    tags: ["txt", "url", "convert"],
+    category: ["CONVERT TO PDF", "txt-convert", "pdf-convert"],
+    seo: {
+      metaTitle: "TxT to PDF - Convert Txt files",
+      metaDescription: "Convert Txt files to PDF documents."
+    }
+  },
 
   // CONVERT FROM PDF
   {
@@ -318,6 +369,22 @@ export const tools: Tool[] = [
       metaDescription: "Convert PDF documents to editable PowerPoint presentations."
     }
   },
+   {
+    title: "PDF to Tiff",
+    description: "Convert PDF files to tiff documents.",
+    shortDescription: "Convert pdf files to tiff documents.",
+    slug: "pdf-to-tiff",
+    icon: Image,
+    iconColor: "text-yellow-600",
+    bgColor: "bg-yellow-50",
+    href: "/convert/pdf-to-tiff",
+    tags: ["tiff", "url", "convert"],
+    category: ["CONVERT TO PDF", "tiff-convert", "pdf-convert"],
+    seo: {
+      metaTitle: "PDF to tiff - Convert PDF files",
+      metaDescription: "Convert PDF files to tiff documents."
+    }
+  },
   {
     title: "PDF to PDF/A",
     description: "Convert PDF documents to PDF/A for long-term archiving.",
@@ -334,24 +401,39 @@ export const tools: Tool[] = [
       metaDescription: "Convert PDF documents to PDF/A for long-term archiving."
     }
   },
-
-  // EDIT PDF
   {
-    title: "Rotate PDF",
-    description: "Rotate pages in your PDF document.",
-    shortDescription: "Rotate pages in your PDF document.",
-    slug: "rotate-pdf",
-    icon: RotateCw,
-    iconColor: "text-purple-600",
-    bgColor: "bg-purple-50",
-    href: "/rotate-pdf",
-    tags: ["rotate", "pages"],
-    category: ["EDIT PDF", "pdf-edit"],
+    title: "PDF to TXT",
+    description: "Convert PDF files to TXT documents.",
+    shortDescription: "Convert PDF files to Txt documents.",
+    slug: "pdf-to-txt",
+    icon: Text,
+    iconColor: "text-yellow-600",
+    bgColor: "bg-yellow-50",
+    href: "/convert/pdf-to-txt",
+    tags: ["txt", "url", "convert"],
+    category: ["CONVERT TO PDF", "txt-convert", "pdf-convert"],
     seo: {
-      metaTitle: "Rotate PDF - Rotate Pages",
-      metaDescription: "Rotate pages in your PDF document."
+      metaTitle: "PDF to txt - Convert PDF files",
+      metaDescription: "Convert PDF files to txt files."
     }
   },
+  {
+    title: "PDF to ZIP",
+    description: "Convert PDF files to ZIP file.",
+    shortDescription: "Convert PDF files to Zip files.",
+    slug: "pdf-to-zip",
+    icon: Image,
+    iconColor: "text-yellow-600",
+    bgColor: "bg-yellow-50",
+    href: "/convert/pdf-to-zip",
+    tags: ["zip", "url", "convert"],
+    category: ["CONVERT TO PDF", "zip-convert", "pdf-convert"],
+    seo: {
+      metaTitle: "PDF to ZIP - Convert PDF files",
+      metaDescription: "Convert PDF files to Zip files."
+    }
+  },
+  // EDIT PDF
   {
     title: "Add page numbers",
     description: "Add page numbers to your PDF document.",

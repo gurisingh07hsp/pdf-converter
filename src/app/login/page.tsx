@@ -6,6 +6,7 @@ import { Eye, EyeOff, ArrowRight, ShieldCheck } from "lucide-react";
 import axios from "axios";
 import { useUser } from "@/context/UserContext";
 import { useRouter } from "next/navigation";
+import Image from "next/image";
 
 export default function LoginPage() {
   const [showPassword, setShowPassword] = useState(false);
@@ -45,8 +46,7 @@ export default function LoginPage() {
       <div className="flex-1 flex flex-col justify-center px-8 md:px-24 lg:px-32 xl:px-48">
         <div className="max-w-md w-full mx-auto">
           <Link href="/" className="flex items-center text-2xl font-bold mb-12">
-            <span className="text-primary">PDF</span>
-            <span className="text-foreground">Swift</span>
+            <Image src={'/logo.png'} alt="logo" width={130} height={50} />
           </Link>
 
           <h1 className="text-3xl font-extrabold text-foreground mb-4">Welcome back</h1>

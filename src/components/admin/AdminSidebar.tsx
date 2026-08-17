@@ -18,6 +18,7 @@ import {
 } from "lucide-react";
 import { clsx, type ClassValue } from "clsx";
 import { twMerge } from "tailwind-merge";
+import Image from "next/image";
 
 function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
@@ -41,14 +42,13 @@ export default function AdminSidebar() {
       {/* Brand */}
       <div className="p-6 border-b border-border-custom">
         <Link href="/" className="flex items-center text-xl font-bold">
-          <span className="text-primary">PDF</span>
-          <span className="text-foreground">Swift</span>
+          <Image src={'/logo.png'} alt="logo" width={130} height={50} />
           <span className="ml-2 px-2 py-0.5 bg-orange-50 text-primary text-[10px] rounded uppercase tracking-wider">Admin</span>
         </Link>
       </div>
 
       {/* Navigation */}
-      <nav className="flex-grow p-4 space-y-2 mt-4">
+      <nav className="grow p-4 space-y-2 mt-4">
         {sidebarItems.map((item) => {
           const isActive = pathname === item.href;
           return (
@@ -78,7 +78,7 @@ export default function AdminSidebar() {
           <div className="w-10 h-10 rounded-full bg-primary flex items-center justify-center text-white font-bold">
             AD
           </div>
-          <div className="flex-grow overflow-hidden">
+          <div className="grow overflow-hidden">
             <p className="text-xs font-bold text-foreground truncate">Admin User</p>
             <p className="text-[10px] text-gray-400 font-medium">Super Admin</p>
           </div>
