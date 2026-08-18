@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import dynamic from 'next/dynamic';
 import { 
   Plus, 
   Edit2, 
@@ -26,13 +27,18 @@ import {
   CheckCircle2,
   ChevronDown
 } from "lucide-react";
+const TiptapEditor = dynamic(() => import('@/components/TipTapEditor'), {
+  ssr: false,
+  loading: () => <p>Loading editor...</p>
+});
 
 interface Blog {
-  id: string;
+  _id: string;
   title: string;
   author: string;
   category: string;
   readTime: string;
+  image: string;
   excerpt: string;
   content: string;
   tags: string[];
@@ -51,12 +57,14 @@ const CATEGORIES = ["Select Category", "PDF Tools", "Tutorials", "Productivity",
 export default function BlogManagement() {
   const [blogs, setBlogs] = useState<Blog[]>([]);
   const [isEditing, setIsEditing] = useState(false);
+  const [isupdate, setIsUpdate] = useState(false);
   const [tagInput, setTagInput] = useState("");
   const [currentBlog, setCurrentBlog] = useState<Partial<Blog>>({
     title: "",
     author: "",
     category: "Select Category",
     readTime: "5",
+    image: "",
     excerpt: "",
     content: "",
     tags: [],
@@ -68,7 +76,6 @@ export default function BlogManagement() {
       canonical: ""
     }
   });
-
   useEffect(() => {
     fetchBlogs();
   }, []);
@@ -77,18 +84,32 @@ export default function BlogManagement() {
     const res = await fetch("/api/admin/blogs");
     const data = await res.json();
     setBlogs(data);
+    console.log("data : ", data);
   };
 
   const handleSave = async () => {
-    const res = await fetch("/api/admin/blogs", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(currentBlog),
-    });
-    if (res.ok) {
-      setIsEditing(false);
-      resetForm();
-      fetchBlogs();
+    if(isupdate){
+      const res = await fetch(`/api/admin/blogs/${currentBlog._id}`, {
+        method: 'PUT',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify(currentBlog)
+      });
+      if(res.ok){
+        setIsEditing(false);
+        resetForm();
+        fetchBlogs();
+      }
+    }else{
+      const res = await fetch("/api/admin/blogs", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(currentBlog),
+      });
+      if (res.ok) {
+        setIsEditing(false);
+        resetForm();
+        fetchBlogs();
+      }
     }
   };
 
@@ -99,6 +120,7 @@ export default function BlogManagement() {
       category: "Select Category",
       readTime: "5",
       excerpt: "",
+      image: "",
       content: "",
       tags: [],
       seo: {
@@ -109,6 +131,7 @@ export default function BlogManagement() {
         canonical: ""
       }
     });
+    setIsUpdate(false);
   };
 
   const generateSlug = () => {
@@ -147,14 +170,14 @@ export default function BlogManagement() {
   const handleEdit = (blog: Blog) => {
     setCurrentBlog(blog);
     setIsEditing(true);
+    setIsUpdate(true);
   };
 
   const handleDelete = async (id: string) => {
     if (!confirm("Are you sure you want to delete this post?")) return;
-    const res = await fetch("/api/admin/blogs", {
+    const res = await fetch(`/api/admin/blogs/${id}`, {
       method: "DELETE",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ id }),
     });
     if (res.ok) {
       fetchBlogs();
@@ -179,7 +202,7 @@ export default function BlogManagement() {
       </div>
 
       {isEditing && (
-        <div className="bg-white rounded-[2rem] border border-border-custom shadow-sm overflow-hidden animate-in fade-in slide-in-from-top-4 duration-300">
+        <div className="bg-white rounded-4xl border border-border-custom shadow-sm overflow-hidden animate-in fade-in slide-in-from-top-4 duration-300">
           <div className="p-8 border-b border-border-custom bg-gray-50/50">
             <h2 className="text-lg font-bold text-foreground">Add New Blog Post</h2>
           </div>
@@ -239,16 +262,14 @@ export default function BlogManagement() {
             {/* Images */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="space-y-2">
-                <label className="text-[11px] font-bold text-gray-400 uppercase tracking-widest px-1">Featured Images</label>
-                <div className="flex items-center gap-3 w-full bg-white border border-border-custom px-4 py-2.5 rounded-xl">
-                  <input type="file" className="text-xs file:mr-4 file:py-1 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-bold file:bg-surface file:text-foreground hover:file:bg-gray-100 cursor-pointer w-full" />
-                </div>
-              </div>
-              <div className="space-y-2">
-                <label className="text-[11px] font-bold text-gray-400 uppercase tracking-widest px-1">Content Image</label>
-                <div className="flex items-center gap-3 w-full bg-white border border-border-custom px-4 py-2.5 rounded-xl">
-                  <input type="file" className="text-xs file:mr-4 file:py-1 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-bold file:bg-surface file:text-foreground hover:file:bg-gray-100 cursor-pointer w-full" />
-                </div>
+                <label className="text-[11px] font-bold text-gray-400 uppercase tracking-widest px-1">Featured Image</label>
+                <input 
+                  type="text" 
+                  value={currentBlog.image}
+                  onChange={(e) => setCurrentBlog({ ...currentBlog, image: e.target.value })}
+                  className="w-full bg-white border border-border-custom px-4 py-3 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all"
+                  placeholder="Enter image url"
+                />
               </div>
             </div>
 
@@ -267,43 +288,10 @@ export default function BlogManagement() {
             {/* Content with Toolbar */}
             <div className="space-y-2">
               <label className="text-[11px] font-bold text-gray-400 uppercase tracking-widest px-1">Content</label>
-              <div className="border border-border-custom rounded-2xl overflow-hidden shadow-sm">
-                {/* Toolbar */}
-                <div className="bg-surface p-2 border-b border-border-custom flex flex-wrap gap-1">
-                  {[
-                    { icon: Bold }, { icon: Italic }, { icon: Underline }, { icon: Strikethrough },
-                    { divider: true },
-                    { label: "Paragraph", dropdown: true },
-                    { divider: true },
-                    { icon: List }, { icon: ListOrdered },
-                    { divider: true },
-                    { icon: AlignLeft }, { icon: AlignCenter }, { icon: AlignRight },
-                    { divider: true },
-                    { icon: LinkIcon }, { icon: ImageIcon }, { icon: Table }, { icon: Quote }, { icon: Code },
-                    { divider: true },
-                    { icon: Undo2 }, { icon: Redo2 }
-                  ].map((item, i) => (
-                    item.divider ? (
-                      <div key={`d-${i}`} className="w-px h-6 bg-border-custom mx-1 self-center" />
-                    ) : item.dropdown ? (
-                      <button key={`b-${i}`} className="flex items-center gap-2 px-3 py-1.5 rounded-lg border border-border-custom bg-white text-[11px] font-bold text-foreground hover:bg-gray-50">
-                        {item.label} <ChevronDown className="w-3 h-3" />
-                      </button>
-                    ) : item.icon ? (
-                      <button key={`b-${i}`} className="p-2 rounded-lg hover:bg-white hover:shadow-sm text-gray-500 hover:text-primary transition-all">
-                        <item.icon className="w-4 h-4" />
-                      </button>
-                    ) : null
-                  ))}
-                </div>
-                <textarea 
-                  rows={12}
-                  value={currentBlog.content}
-                  onChange={(e) => setCurrentBlog({ ...currentBlog, content: e.target.value })}
-                  className="w-full bg-white px-6 py-4 text-sm focus:outline-none resize-none min-h-[300px]"
-                  placeholder="Write your blog content here..."
-                />
-              </div>
+              <TiptapEditor
+                value={currentBlog.content}
+                onChange={(content: any) => setCurrentBlog({ ...currentBlog, content: content })}
+              />
             </div>
 
             {/* Tags */}
@@ -382,13 +370,13 @@ export default function BlogManagement() {
                 <div className="space-y-2">
                   <label className="text-[11px] font-bold text-gray-400 uppercase tracking-widest px-1">URL Slug</label>
                   <div className="flex gap-2">
-                    <div className="flex-grow flex items-center bg-surface border border-border-custom rounded-xl px-4 py-3">
+                    <div className="grow flex items-center bg-surface border border-border-custom rounded-xl px-4 py-3">
                       <span className="text-gray-300 text-xs font-medium">/blog/</span>
                       <input 
                         type="text" 
                         value={currentBlog.seo?.slug}
                         onChange={(e) => setCurrentBlog({ ...currentBlog, seo: { ...currentBlog.seo!, slug: e.target.value }})}
-                        className="flex-grow bg-transparent border-none text-sm focus:outline-none ml-1"
+                        className="grow bg-transparent border-none text-sm focus:outline-none ml-1"
                         placeholder="url-friendly-slug"
                       />
                     </div>
@@ -421,7 +409,7 @@ export default function BlogManagement() {
               onClick={handleSave}
               className="bg-[#f97316] text-white px-10 py-3 rounded-xl text-sm font-black uppercase tracking-wider hover:opacity-90 transition-all shadow-lg shadow-orange-500/20"
             >
-              {currentBlog.id ? "Update Blog" : "Create Blog"}
+              {isupdate ? "Update Blog" : "Create Blog"}
             </button>
             <button 
               onClick={() => { setIsEditing(false); resetForm(); }}
@@ -437,7 +425,7 @@ export default function BlogManagement() {
       {!isEditing && (
         <div className="grid grid-cols-1 gap-4">
           {blogs.map((blog) => (
-            <div key={blog.id} className="bg-white p-6 rounded-[1.5rem] border border-border-custom shadow-sm flex items-center justify-between group hover:border-primary/20 transition-all">
+            <div key={blog._id} className="bg-white p-6 rounded-3xl border border-border-custom shadow-sm flex items-center justify-between group hover:border-primary/20 transition-all">
               <div className="flex items-center gap-6">
                 <div className="w-16 h-16 bg-surface rounded-xl flex items-center justify-center">
                   <ImageIcon className="w-6 h-6 text-gray-200" />
@@ -466,7 +454,7 @@ export default function BlogManagement() {
                   <Edit2 className="w-4 h-4" />
                 </button>
                 <button 
-                  onClick={() => handleDelete(blog.id)}
+                  onClick={() => handleDelete(blog._id)}
                   className="p-2.5 rounded-xl text-gray-400 hover:bg-red-50 hover:text-red-500 transition-all border border-transparent hover:border-red-100"
                 >
                   <Trash2 className="w-4 h-4" />
@@ -475,7 +463,7 @@ export default function BlogManagement() {
             </div>
           ))}
           {blogs.length === 0 && (
-            <div className="text-center py-32 bg-white rounded-[2rem] border border-dashed border-border-custom">
+            <div className="text-center py-32 bg-white rounded-4xl border border-dashed border-border-custom">
               <div className="w-20 h-20 bg-gray-50 rounded-full flex items-center justify-center mx-auto mb-6">
                 <Plus className="w-10 h-10 text-gray-200" />
               </div>
